@@ -1,0 +1,281 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "The system sends 2 messages every 2 minutes.",
+        "title": "Automatic Message Sender API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/v1",
+    "paths": {
+        "/assets/deposit": {
+            "post": {
+                "description": "Deposit funds into a wallet",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "assets"
+                ],
+                "summary": "Deposit funds",
+                "operationId": "deposit",
+                "parameters": [
+                    {
+                        "description": "Deposit request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.TransactionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.assetResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.assetResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.assetResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/assets/schedule": {
+            "post": {
+                "description": "Schedule a future transaction",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "assets"
+                ],
+                "summary": "Schedule a transaction",
+                "operationId": "schedule-transaction",
+                "parameters": [
+                    {
+                        "description": "Scheduled transaction request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.ScheduledTransaction"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.assetResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.assetResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.assetResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/assets/transfer": {
+            "post": {
+                "description": "Transfer funds between wallets",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "assets"
+                ],
+                "summary": "Transfer funds",
+                "operationId": "transfer",
+                "parameters": [
+                    {
+                        "description": "Transfer request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.TransferRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.assetResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.assetResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.assetResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/assets/withdraw": {
+            "post": {
+                "description": "Withdraw funds from a wallet",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "assets"
+                ],
+                "summary": "Withdraw funds",
+                "operationId": "withdraw",
+                "parameters": [
+                    {
+                        "description": "Withdraw request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.TransactionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.assetResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.assetResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.assetResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "entity.ScheduledTransaction": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "execute_time": {
+                    "description": "When this should be executed",
+                    "type": "string"
+                },
+                "from_wallet": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "description": "\"scheduled\", \"executed\"",
+                    "type": "string"
+                },
+                "to_wallet": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.TransactionRequest": {
+            "type": "object",
+            "required": [
+                "amount",
+                "wallet_id"
+            ],
+            "properties": {
+                "amount": {
+                    "description": "Transaction amount",
+                    "type": "number"
+                },
+                "wallet_id": {
+                    "description": "Wallet performing the transaction",
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.TransferRequest": {
+            "type": "object",
+            "required": [
+                "amount",
+                "from_wallet_id",
+                "to_wallet_id"
+            ],
+            "properties": {
+                "amount": {
+                    "description": "Transfer amount",
+                    "type": "number"
+                },
+                "from_wallet_id": {
+                    "description": "Sender wallet",
+                    "type": "integer"
+                },
+                "to_wallet_id": {
+                    "description": "Receiver wallet",
+                    "type": "integer"
+                }
+            }
+        },
+        "v1.assetResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

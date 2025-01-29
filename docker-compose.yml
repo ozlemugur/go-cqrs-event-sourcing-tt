@@ -1,0 +1,124 @@
+
+services:
+  # PostgreSQL for Wallet Management Service
+  wallet-db:
+    image: postgres:15
+    container_name: wallet-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: wallet_user
+      POSTGRES_PASSWORD: wallet_password
+      POSTGRES_DB: wallet_db
+    volumes:
+      - wallet-db-data:/var/lib/postgresql/data
+
+  # Wallet Management Service
+  wallet-management-service:
+    build:
+      context: .
+      dockerfile: wallet-management-service/Dockerfile
+    container_name: wallet-management-service
+    environment:
+      PG_URL: 'postgres://wallet_user:wallet_password@wallet-db:5432/wallet_db'
+    depends_on:
+      - wallet-db
+    ports:
+      - "8081:8080"
+
+  # PostgreSQL for Query Service (Read Model)
+  query-db:
+    image: postgres:15
+    container_name: query-db
+    restart: always
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: query_user
+      POSTGRES_PASSWORD: query_password
+      POSTGRES_DB: query_db
+    volumes:
+      - query-db-data:/var/lib/postgresql/data
+
+
+  # Asset Query Service (Reads from Query DB and Serves Clients)
+  asset-query-service:
+    build:
+      context: .
+      dockerfile: asset-query-service/Dockerfile
+    container_name: asset-query-service
+    restart: always
+    environment:
+      QUERY_DB_HOST: query-db
+      QUERY_DB_PORT: 5432
+      QUERY_DB_USER: query_user
+      QUERY_DB_PASSWORD: query_password
+      QUERY_DB_NAME: query_db
+    depends_on:
+      - query-db
+    ports:
+      - "8083:8080"
+
+ # Kafka Broker (Event Journal) with KRaft Mode (NO Zookeeper)
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: kafka
+    restart: always
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: controller,broker
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    command: >
+      bash -c "
+      kafka-storage format --ignore-formatted -t $(kafka-storage random-uuid) -c /etc/kafka/kafka.properties &&
+      kafka-server-start /etc/kafka/kafka.properties"
+
+  # Asset Query Processor (Consumes Kafka Events and Updates Query DB)
+  asset-query-processor:
+    build:
+      context: ./asset-query-processor
+      dockerfile: Dockerfile
+    container_name: asset-query-processor
+    restart: always
+    environment:
+      KAFKA_BROKER: kafka:9092
+      EVENT_TOPIC: event-journal
+      QUERY_DB_HOST: query-db
+      QUERY_DB_PORT: 5432
+      QUERY_DB_USER: query_user
+      QUERY_DB_PASSWORD: query_password
+      QUERY_DB_NAME: query_db
+    depends_on:
+      - kafka
+      - query-db
+
+    
+    
+    # Asset Management Service (Command API - Writes to Kafka)
+  asset-management-service:
+    build:
+      context: .
+      dockerfile: asset-management-service/Dockerfile
+    container_name: asset-management-service
+    restart: always
+    environment:
+      KAFKA_BROKER: kafka:9092
+      EVENT_TOPIC: event-journal  # Writes all transactions to this topic
+    depends_on:
+      - kafka
+    ports:
+      - "8082:8080"
+
+
+volumes:
+  wallet-db-data:
+  query-db-data:
+  kafka-data:

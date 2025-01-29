@@ -1,0 +1,20 @@
+app:
+  name: 'wallet-message-service'
+  version: '1.0.0'
+
+http:
+  port: '8080'
+
+
+logger:
+  log_level: 'trace'
+  rollbar_env: 'message-sender'
+
+
+postgres:
+  pool_max: 5
+  url: 'postgres://wallet_user:wallet_password@127.0.0.1:5432/wallet_db'
+
+mocky:
+  url: 'https://run.mocky.io/v3/867bd0cd-d166-4885-bc1f-32894a3ff73a'
+

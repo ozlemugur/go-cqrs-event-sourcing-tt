@@ -1,0 +1,547 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "The system sends 2 messages every 2 minutes.",
+        "title": "Automatic Message Sender API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/v1",
+    "paths": {
+        "/assets/deposit": {
+            "post": {
+                "description": "Deposit funds into a wallet",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "assets"
+                ],
+                "summary": "Deposit funds",
+                "operationId": "deposit",
+                "parameters": [
+                    {
+                        "description": "Deposit request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.TransactionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.assetResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.assetResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.assetResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/assets/schedule": {
+            "post": {
+                "description": "Schedule a future transaction",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "assets"
+                ],
+                "summary": "Schedule a transaction",
+                "operationId": "schedule-transaction",
+                "parameters": [
+                    {
+                        "description": "Scheduled transaction request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.ScheduledTransaction"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.assetResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.assetResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.assetResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/assets/transfer": {
+            "post": {
+                "description": "Transfer funds between wallets",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "assets"
+                ],
+                "summary": "Transfer funds",
+                "operationId": "transfer",
+                "parameters": [
+                    {
+                        "description": "Transfer request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.TransferRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.assetResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.assetResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.assetResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/assets/withdraw": {
+            "post": {
+                "description": "Withdraw funds from a wallet",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "assets"
+                ],
+                "summary": "Withdraw funds",
+                "operationId": "withdraw",
+                "parameters": [
+                    {
+                        "description": "Withdraw request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.TransactionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.assetResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.assetResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.assetResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/wallets": {
+            "get": {
+                "description": "Get a list of all wallets from the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "wallets"
+                ],
+                "summary": "Retrieve all wallets",
+                "operationId": "get-all-wallets",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v1.walletResponse"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/wallet-management-service_internal_controller_http_v1.response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Add a new wallet to the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "wallets"
+                ],
+                "summary": "Create a new wallet",
+                "operationId": "create-wallet",
+                "parameters": [
+                    {
+                        "description": "Wallet details",
+                        "name": "wallet",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Wallet"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/wallet-management-service_internal_controller_http_v1.response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/wallet-management-service_internal_controller_http_v1.response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/wallet-management-service_internal_controller_http_v1.response"
+                        }
+                    }
+                }
+            }
+        },
+        "/wallets/{id}": {
+            "get": {
+                "description": "Get details of a specific wallet by its ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "wallets"
+                ],
+                "summary": "Retrieve a wallet by ID",
+                "operationId": "get-wallet-by-id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Wallet ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entity.Wallet"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/wallet-management-service_internal_controller_http_v1.response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/wallet-management-service_internal_controller_http_v1.response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update details of a specific wallet",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "wallets"
+                ],
+                "summary": "Update a wallet by ID",
+                "operationId": "update-wallet",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Wallet ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated wallet details",
+                        "name": "wallet",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Wallet"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/wallet-management-service_internal_controller_http_v1.response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/wallet-management-service_internal_controller_http_v1.response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/wallet-management-service_internal_controller_http_v1.response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/wallet-management-service_internal_controller_http_v1.response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Remove a specific wallet from the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "wallets"
+                ],
+                "summary": "Delete a wallet by ID",
+                "operationId": "delete-wallet",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Wallet ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/wallet-management-service_internal_controller_http_v1.response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/wallet-management-service_internal_controller_http_v1.response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/wallet-management-service_internal_controller_http_v1.response"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "entity.ScheduledTransaction": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "execute_time": {
+                    "description": "When this should be executed",
+                    "type": "string"
+                },
+                "from_wallet": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "description": "\"scheduled\", \"executed\"",
+                    "type": "string"
+                },
+                "to_wallet": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.TransactionRequest": {
+            "type": "object",
+            "required": [
+                "amount",
+                "wallet_id"
+            ],
+            "properties": {
+                "amount": {
+                    "description": "Transaction amount",
+                    "type": "number"
+                },
+                "wallet_id": {
+                    "description": "Wallet performing the transaction",
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.TransferRequest": {
+            "type": "object",
+            "required": [
+                "amount",
+                "from_wallet_id",
+                "to_wallet_id"
+            ],
+            "properties": {
+                "amount": {
+                    "description": "Transfer amount",
+                    "type": "number"
+                },
+                "from_wallet_id": {
+                    "description": "Sender wallet",
+                    "type": "integer"
+                },
+                "to_wallet_id": {
+                    "description": "Receiver wallet",
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.Wallet": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "description": "Wallet address",
+                    "type": "string"
+                },
+                "network": {
+                    "description": "Wallet network",
+                    "type": "string"
+                }
+            }
+        },
+        "v1.assetResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.walletResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "wallets": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.Wallet"
+                    }
+                }
+            }
+        },
+        "wallet-management-service_internal_controller_http_v1.response": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "detail"
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,188 @@
+basePath: /v1
+definitions:
+  entity.ScheduledTransaction:
+    properties:
+      amount:
+        type: number
+      created_at:
+        type: string
+      execute_time:
+        description: When this should be executed
+        type: string
+      from_wallet:
+        type: integer
+      id:
+        type: integer
+      status:
+        description: '"scheduled", "executed"'
+        type: string
+      to_wallet:
+        type: integer
+    type: object
+  entity.TransactionRequest:
+    properties:
+      amount:
+        description: Transaction amount
+        type: number
+      wallet_id:
+        description: Wallet performing the transaction
+        type: integer
+    required:
+    - amount
+    - wallet_id
+    type: object
+  entity.TransferRequest:
+    properties:
+      amount:
+        description: Transfer amount
+        type: number
+      from_wallet_id:
+        description: Sender wallet
+        type: integer
+      to_wallet_id:
+        description: Receiver wallet
+        type: integer
+    required:
+    - amount
+    - from_wallet_id
+    - to_wallet_id
+    type: object
+  v1.assetResponse:
+    properties:
+      error:
+        type: string
+      status:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: The system sends 2 messages every 2 minutes.
+  title: Automatic Message Sender API
+  version: "1.0"
+paths:
+  /assets/deposit:
+    post:
+      consumes:
+      - application/json
+      description: Deposit funds into a wallet
+      operationId: deposit
+      parameters:
+      - description: Deposit request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.TransactionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.assetResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.assetResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.assetResponse'
+      summary: Deposit funds
+      tags:
+      - assets
+  /assets/schedule:
+    post:
+      consumes:
+      - application/json
+      description: Schedule a future transaction
+      operationId: schedule-transaction
+      parameters:
+      - description: Scheduled transaction request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.ScheduledTransaction'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.assetResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.assetResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.assetResponse'
+      summary: Schedule a transaction
+      tags:
+      - assets
+  /assets/transfer:
+    post:
+      consumes:
+      - application/json
+      description: Transfer funds between wallets
+      operationId: transfer
+      parameters:
+      - description: Transfer request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.TransferRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.assetResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.assetResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.assetResponse'
+      summary: Transfer funds
+      tags:
+      - assets
+  /assets/withdraw:
+    post:
+      consumes:
+      - application/json
+      description: Withdraw funds from a wallet
+      operationId: withdraw
+      parameters:
+      - description: Withdraw request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.TransactionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.assetResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.assetResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.assetResponse'
+      summary: Withdraw funds
+      tags:
+      - assets
+swagger: "2.0"

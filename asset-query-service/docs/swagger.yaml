@@ -1,0 +1,169 @@
+basePath: /v1
+definitions:
+  entity.Transaction:
+    properties:
+      amount:
+        description: Transaction amount
+        type: number
+      created_at:
+        description: Timestamp when the transaction occurred
+        type: string
+      id:
+        description: Unique transaction ID
+        type: integer
+      target_wallet_id:
+        description: For transfer transactions
+        type: integer
+      type:
+        description: '"withdraw", "deposit", or "transfer"'
+        type: string
+      wallet_id:
+        description: Wallet associated with the transaction
+        type: integer
+    type: object
+  entity.Wallet:
+    properties:
+      address:
+        description: Wallet address
+        type: string
+      network:
+        description: Wallet network
+        type: string
+    type: object
+  v1.BalanceResponse:
+    properties:
+      balance:
+        type: number
+      error:
+        type: string
+      status:
+        type: string
+      wallet_id:
+        type: integer
+    type: object
+  v1.TransactionHistoryResponse:
+    properties:
+      count:
+        type: integer
+      error:
+        type: string
+      status:
+        type: string
+      transactions:
+        items:
+          $ref: '#/definitions/entity.Transaction'
+        type: array
+    type: object
+  v1.WalletResponse:
+    properties:
+      error:
+        type: string
+      status:
+        type: string
+      wallet:
+        $ref: '#/definitions/entity.Wallet'
+    type: object
+  v1.response:
+    properties:
+      error:
+        example: detail
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Wallet Management
+  title: Wallet Management Service
+  version: "1.0"
+paths:
+  /wallets/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get details of a specific wallet by its ID
+      operationId: get-wallet-by-id
+      parameters:
+      - description: Wallet ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.WalletResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: Retrieve a wallet by ID
+      tags:
+      - wallets
+  /wallets/{id}/balance:
+    get:
+      consumes:
+      - application/json
+      description: Get the balance of a specific wallet
+      operationId: get-wallet-balance
+      parameters:
+      - description: Wallet ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.BalanceResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: Retrieve wallet balance
+      tags:
+      - wallets
+  /wallets/{id}/transactions:
+    get:
+      consumes:
+      - application/json
+      description: Get the transaction history for a wallet
+      operationId: get-wallet-transaction-history
+      parameters:
+      - description: Wallet ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.TransactionHistoryResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: Retrieve transaction history
+      tags:
+      - wallets
+swagger: "2.0"
