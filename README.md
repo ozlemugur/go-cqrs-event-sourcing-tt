@@ -1,6 +1,6 @@
 ![go-clean-arch-tt](docs/img/purpleGopher.svg)
 
-# go clean architecture (tahassurtalih)
+# go clean cqrs event sourcing (tahassurtalih)
 
 
 
