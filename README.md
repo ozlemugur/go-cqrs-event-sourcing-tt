@@ -45,8 +45,11 @@ no matching versions for query "latest"
  go mod tidy çalışmıyordu.
 
 
-** congifursyonların envden alınmasını ayarla.
-** KRaft mode çalışılabilir.
+** konfigurasyonların envden alınmasını ayarla.
+** Kraft mode çalışılabilir.
+
+** docker builder prune
+** docker system prune -a
 
 
 

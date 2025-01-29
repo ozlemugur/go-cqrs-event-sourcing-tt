@@ -11,11 +11,11 @@ COPY --from=modules /go/pkg /go/pkg
 COPY . /app
 WORKDIR /app
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
-    go build -o /bin/asset-query-processor ./asset-query-processor/cmd/app
+    go build -o /bin/asset-query-processor ./cmd/app
 
 # Step 3: Final
 FROM scratch
-COPY --from=builder /app/asset-query-processor/config /config
+COPY --from=builder /app/config /config
 COPY --from=builder /bin/asset-query-processor /asset-query-processor
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 CMD ["/asset-query-processor"]

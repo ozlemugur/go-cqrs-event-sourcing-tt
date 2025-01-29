@@ -32,8 +32,13 @@ func Run(cfg *config.Config) {
 	eventHandler := usecase.NewEventHandler(queryRepo, l)
 
 	// Kafka setup
-	kafkaBroker := os.Getenv("KAFKA_BROKER")      // e.g., "kafka:9092"
-	eventTopic := os.Getenv("EVENT_TOPIC")        // e.g., "event-journal"
+
+	kafkaBroker := cfg.Kafka.KAFKA_BROKER // os.Getenv("KAFKA_BROKER")      // e.g., "kafka:9092"
+	l.Info("KAFKA_BROKER")
+	l.Info(kafkaBroker)
+	eventTopic := cfg.Kafka.EVENT_TOPIC // e.g., "event-journal"
+	l.Info("EVENT_TOPIC")
+	l.Info(eventTopic)
 	kafkaGroupID := "asset-query-processor-group" // Consumer group ID
 
 	// Initialize Kafka consumer

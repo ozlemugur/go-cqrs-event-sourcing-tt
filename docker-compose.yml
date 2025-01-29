@@ -16,11 +16,12 @@ services:
   # Wallet Management Service
   wallet-management-service:
     build:
-      context: .
-      dockerfile: wallet-management-service/Dockerfile
+      context: ./wallet-management-service
+      dockerfile: Dockerfile
     container_name: wallet-management-service
     environment:
       PG_URL: 'postgres://wallet_user:wallet_password@wallet-db:5432/wallet_db'
+      LOG_LEVEL: trace
     depends_on:
       - wallet-db
     ports:
@@ -37,6 +38,7 @@ services:
       POSTGRES_USER: query_user
       POSTGRES_PASSWORD: query_password
       POSTGRES_DB: query_db
+      LOG_LEVEL: trace
     volumes:
       - query-db-data:/var/lib/postgresql/data
 
@@ -44,8 +46,8 @@ services:
   # Asset Query Service (Reads from Query DB and Serves Clients)
   asset-query-service:
     build:
-      context: .
-      dockerfile: asset-query-service/Dockerfile
+      context: ./asset-query-service
+      dockerfile: Dockerfile
     container_name: asset-query-service
     restart: always
     environment:
@@ -54,6 +56,8 @@ services:
       QUERY_DB_USER: query_user
       QUERY_DB_PASSWORD: query_password
       QUERY_DB_NAME: query_db
+      PG_URL: 'postgres://query_user:query_password@query-db:5432/query_db'
+      LOG_LEVEL: trace
     depends_on:
       - query-db
     ports:
@@ -96,6 +100,7 @@ services:
       QUERY_DB_USER: query_user
       QUERY_DB_PASSWORD: query_password
       QUERY_DB_NAME: query_db
+      LOG_LEVEL: trace
     depends_on:
       - kafka
       - query-db
@@ -105,13 +110,14 @@ services:
     # Asset Management Service (Command API - Writes to Kafka)
   asset-management-service:
     build:
-      context: .
-      dockerfile: asset-management-service/Dockerfile
+      context: ./asset-management-service
+      dockerfile: Dockerfile
     container_name: asset-management-service
     restart: always
     environment:
       KAFKA_BROKER: kafka:9092
       EVENT_TOPIC: event-journal  # Writes all transactions to this topic
+      LOG_LEVEL: trace
     depends_on:
       - kafka
     ports:

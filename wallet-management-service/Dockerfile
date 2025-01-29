@@ -12,11 +12,12 @@ COPY --from=modules /go/pkg /go/pkg
 COPY . /app
 WORKDIR /app
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
-    go build -o /bin/wallet-management-service ./wallet-management-service/cmd/app
+    go build -o /bin/wallet-management-service ./cmd/app
+
 
 # Step 3: Final
 FROM scratch
-COPY --from=builder /app/wallet-management-service/config /config
+COPY --from=builder /app/config /config
 COPY --from=builder /bin/wallet-management-service /wallet-management-service
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 CMD ["/wallet-management-service"]

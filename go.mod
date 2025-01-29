@@ -1,6 +1,6 @@
 module github.com/ozlemugur/go-cqrs-event-sourcing-tt
 
-go 1.23.4
+go 1.22
 
 require (
 	github.com/Masterminds/squirrel v1.5.4

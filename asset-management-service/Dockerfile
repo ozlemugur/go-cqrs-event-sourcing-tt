@@ -11,11 +11,11 @@ COPY --from=modules /go/pkg /go/pkg
 COPY . /app
 WORKDIR /app
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
-    go build -o /bin/asset-management-service  ./asset-management-service/cmd/app
+    go build -o /bin/asset-management-service  ./cmd/app
 
 # Step 3: Final
 FROM scratch
-COPY --from=builder /app/asset-management-service/config /config
+COPY --from=builder /app/config /config
 COPY --from=builder /bin/asset-management-service /asset-management-service
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 CMD ["/asset-management-service"]

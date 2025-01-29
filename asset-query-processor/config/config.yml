@@ -15,6 +15,7 @@ postgres:
   pool_max: 5
   url: 'postgres://user:pass@127.0.0.1:5432/postgres'
 
-mocky:
-  url: 'https://run.mocky.io/v3/867bd0cd-d166-4885-bc1f-32894a3ff73a'
+kafka:
+   KAFKA_BROKER: 'kafka:9092'
+   EVENT_TOPIC: 'event-journal'
 

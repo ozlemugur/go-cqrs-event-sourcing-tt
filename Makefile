@@ -34,11 +34,11 @@ prepare: ##  prepare the environment
 .PHONY: prepare
 
 compose-up: ##  Run docker-compose 
-	docker-compose up --build -d  && docker-compose logs -f
+	docker-compose up --build -d  wallet-db  wallet-management-service  query-db asset-query-service  kafka  && docker-compose logs -f
 .PHONY: compose-up
 
 compose-up-app: ##  ddd
-	docker-compose up --build -d asset-query-processor && docker-compose logs -f
+	 docker-compose up --build  -d asset-query-processor  asset-management-service && docker-compose logs -f
 .PHONY: compose-up-app
 
 compose-up-without-app: ##  Run docker-compose without app

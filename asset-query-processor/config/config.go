@@ -13,7 +13,7 @@ type (
 		HTTP  `yaml:"http"`
 		Log   `yaml:"logger"`
 		PG    `yaml:"postgres"`
-		Mocky `yaml:"mocky"`
+		Kafka `yaml:"kafka"`
 	}
 
 	// App -.
@@ -37,8 +37,10 @@ type (
 		PoolMax int    `env-required:"true" yaml:"pool_max" env:"PG_POOL_MAX"`
 		URL     string `env-required:"true"                 env:"PG_URL"`
 	}
-	Mocky struct {
-		URL string `env-required:"true"    `
+
+	Kafka struct {
+		KAFKA_BROKER string `env-required:"true"    env:"KAFKA_BROKER"`
+		EVENT_TOPIC  string `env-required:"true"    env:"EVENT_TOPIC"`
 	}
 )
 
