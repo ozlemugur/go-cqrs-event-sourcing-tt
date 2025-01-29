@@ -10,9 +10,9 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	// Swagger docs.
+	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/pkg/logger"
 	_ "github.com/ozlemugur/go-cqrs-event-sourcing-tt/wallet-management-service/docs"
 	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/wallet-management-service/internal/usecase"
-	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/wallet-management-service/pkg/logger"
 )
 
 // NewRouter -.

@@ -7,13 +7,13 @@ import (
 	"syscall"
 
 	"github.com/gin-gonic/gin"
+	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/pkg/httpserver"
+	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/pkg/logger"
+	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/pkg/postgres"
 	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/wallet-management-service/config"
 	v1 "github.com/ozlemugur/go-cqrs-event-sourcing-tt/wallet-management-service/internal/controller/http/v1"
 	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/wallet-management-service/internal/usecase"
 	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/wallet-management-service/internal/usecase/repo"
-	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/wallet-management-service/pkg/httpserver"
-	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/wallet-management-service/pkg/logger"
-	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/wallet-management-service/pkg/postgres"
 )
 
 func Run(cfg *config.Config) {

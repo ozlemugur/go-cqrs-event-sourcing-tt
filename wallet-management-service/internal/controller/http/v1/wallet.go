@@ -6,9 +6,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/pkg/logger"
 	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/wallet-management-service/internal/entity"
 	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/wallet-management-service/internal/usecase"
-	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/wallet-management-service/pkg/logger"
 )
 
 type walletRoutes struct {

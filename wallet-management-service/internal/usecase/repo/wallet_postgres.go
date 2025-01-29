@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/pkg/postgres"
 	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/wallet-management-service/internal/entity"
-	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/wallet-management-service/pkg/postgres"
 )
 
 type WalletRepo struct {
