@@ -12,6 +12,7 @@ import (
 	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/asset-query-processor/internal/controller"
 	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/asset-query-processor/internal/usecase"
 	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/asset-query-processor/internal/usecase/repo"
+	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/pkg/kafka/consumer"
 	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/pkg/logger"
 	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/pkg/postgres"
 )
@@ -27,6 +28,8 @@ func Run(cfg *config.Config) {
 	}
 	defer pg.Close()
 
+	l.Error("postgresql ayakta.")
+
 	// Initialize use case (business logic handler)
 	queryRepo := repo.NewAssetQueryRepo(pg)
 	eventHandler := usecase.NewEventHandler(queryRepo, l)
@@ -34,15 +37,20 @@ func Run(cfg *config.Config) {
 	// Kafka setup
 
 	kafkaBroker := cfg.Kafka.KAFKA_BROKER // os.Getenv("KAFKA_BROKER")      // e.g., "kafka:9092"
-	l.Info("KAFKA_BROKER")
-	l.Info(kafkaBroker)
+	l.Error("KAFKA_BROKER")
+	l.Error(kafkaBroker)
 	eventTopic := cfg.Kafka.EVENT_TOPIC // e.g., "event-journal"
-	l.Info("EVENT_TOPIC")
-	l.Info(eventTopic)
+	l.Error("EVENT_TOPIC")
+	l.Error(eventTopic)
 	kafkaGroupID := "asset-query-processor-group" // Consumer group ID
 
 	// Initialize Kafka consumer
-	consumer, err := controller.NewEventConsumer(kafkaBroker, kafkaGroupID, eventTopic, eventHandler, l)
+	consumer, err := consumer.NewKafkaConsumer(kafkaBroker, kafkaGroupID, eventTopic)
+	if err != nil {
+		log.Fatal("Failed to initialize Kafka consumer", "error", err)
+	}
+
+	eventConsumer := controller.NewEventConsumer(consumer, eventHandler, l)
 	if err != nil {
 		log.Fatal("Failed to initialize Kafka consumer", "error", err)
 	}
@@ -50,13 +58,14 @@ func Run(cfg *config.Config) {
 	// Create context for graceful shutdown
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+	eventConsumer.Start(ctx)
 
 	// Handle system signals for shutdown
-	go handleShutdown(cancel, consumer, l)
+	/*	go handleShutdown(cancel, consumer, l)
 
-	// Start consuming events
-	l.Info("Starting Event Consumer...")
-	consumer.Start(ctx)
+		// Start consuming events
+		l.Info("Starting Event Consumer...")
+		consumer.Start(ctx) */
 
 }
 

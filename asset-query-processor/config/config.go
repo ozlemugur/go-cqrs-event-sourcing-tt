@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/ilyakaznacheev/cleanenv"
 )
@@ -39,13 +40,22 @@ type (
 	}
 
 	Kafka struct {
-		KAFKA_BROKER string `env-required:"true"    env:"KAFKA_BROKER"`
-		EVENT_TOPIC  string `env-required:"true"    env:"EVENT_TOPIC"`
+		KAFKA_BROKER string `env-required:"true"  yaml:"KAFKA_BROKER"  env:"KAFKA_BROKER"`
+		EVENT_TOPIC  string `env-required:"true"  yaml:"EVENT_TOPIC"  env:"EVENT_TOPIC"`
 	}
 )
 
 func NewConfig() (*Config, error) {
 	cfg := &Config{}
+
+	workingDir, err2 := os.Getwd()
+	if err2 != nil {
+		fmt.Println("Error:", err2)
+
+	}
+
+	// Çalışma dizinini yazdır
+	fmt.Println("Current working directory:", workingDir)
 
 	err := cleanenv.ReadConfig("./config/config.yml", cfg)
 	if err != nil {

@@ -33,5 +33,6 @@ type (
 	/* Event Handler  UseCase Interface */
 	EventHandler interface {
 		ProcessEvent(ctx context.Context, event entity.WalletEvent) error
+		MsgfessageHandler(key, value []byte) error
 	}
 )

@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/asset-query-processor/internal/entity"
@@ -25,6 +26,28 @@ var EventHandlers = map[string]EventTypeHandler{
 	"withdraw": handleWithdraw,
 	"deposit":  handleDeposit,
 	"transfer": handleTransfer,
+}
+
+func (h *eventHandler) MsgfessageHandler(key, value []byte) error {
+	fmt.Printf("Received message with key: %s, value: %s\n", string(key), string(value))
+
+	ctx := context.Background()
+
+	// Mesajın içeriğine bağlı olarak bir işlem yapın
+	if len(value) == 0 {
+		return fmt.Errorf("empty message value")
+	}
+
+	var event entity.WalletEvent
+	if err := json.Unmarshal(value, &event); err != nil {
+		h.log.Error(err, "Failed to process event")
+	}
+
+	if err := h.ProcessEvent(ctx, event); err != nil {
+		h.log.Error(err, "Failed to process event")
+	}
+
+	return nil
 }
 
 // ProcessEvent dynamically handles wallet events using the map

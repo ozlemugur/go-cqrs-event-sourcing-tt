@@ -13,9 +13,9 @@ logger:
 
 postgres:
   pool_max: 5
-  url: 'postgres://user:pass@127.0.0.1:5432/postgres'
+  url: 'postgres://query_user:query_password@127.0.0.1:5433/query_db'
+ 
 
 kafka:
-   KAFKA_BROKER: 'kafka:9092'
-   EVENT_TOPIC: 'event-journal'
-
+  KAFKA_BROKER: '127.0.0.1:9092'
+  EVENT_TOPIC: 'event-journal'
