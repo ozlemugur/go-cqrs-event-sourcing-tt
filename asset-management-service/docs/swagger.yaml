@@ -54,11 +54,11 @@ definitions:
       status:
         type: string
     type: object
-host: localhost:8080
+host: localhost:8082
 info:
   contact: {}
-  description: The system sends 2 messages every 2 minutes.
-  title: Automatic Message Sender API
+  description: Asset Management Service
+  title: Asset Management Service
   version: "1.0"
 paths:
   /assets/deposit:

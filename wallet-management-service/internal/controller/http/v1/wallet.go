@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-
 	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/pkg/logger"
 	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/wallet-management-service/internal/entity"
 	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/wallet-management-service/internal/usecase"
@@ -29,12 +28,18 @@ func newWalletRoutes(handler *gin.RouterGroup, t usecase.WalletHandler, l logger
 	}
 }
 
-// Response format for wallet-related responses
 type walletResponse struct {
 	Wallets []entity.Wallet `json:"wallets"`
 	Count   int             `json:"count"`
 	Status  string          `json:"status"`
 	Error   string          `json:"error,omitempty"`
+}
+
+type assetResponse struct {
+	WalletID int            `json:"wallet_id"`
+	Assets   []entity.Asset `json:"assets"`
+	Status   string         `json:"status"`
+	Error    string         `json:"error,omitempty"`
 }
 
 // @Summary     Retrieve all wallets
@@ -43,7 +48,7 @@ type walletResponse struct {
 // @Tags        wallets
 // @Accept      json
 // @Produce     json
-// @Success     200 {array} walletResponse
+// @Success     200 {object} walletResponse
 // @Failure     500 {object} response
 // @Router      /wallets [get]
 func (r *walletRoutes) GetAllWallets(c *gin.Context) {
@@ -78,7 +83,7 @@ func (r *walletRoutes) GetAllWallets(c *gin.Context) {
 // @Router      /wallets/{id} [get]
 func (r *walletRoutes) GetWalletByID(c *gin.Context) {
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam) // Convert string to int
+	id, err := strconv.Atoi(idParam)
 	if err != nil {
 		r.l.Error(err, "http - v1 - GetWalletByID - invalid ID format")
 		errorResponse(c, http.StatusBadRequest, "Invalid wallet ID")
@@ -139,7 +144,7 @@ func (r *walletRoutes) CreateWallet(c *gin.Context) {
 // @Router      /wallets/{id} [put]
 func (r *walletRoutes) UpdateWallet(c *gin.Context) {
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam) // Convert string to int
+	id, err := strconv.Atoi(idParam)
 	if err != nil {
 		r.l.Error(err, "http - v1 - UpdateWallet - invalid ID format")
 		errorResponse(c, http.StatusBadRequest, "Invalid wallet ID")
@@ -173,7 +178,7 @@ func (r *walletRoutes) UpdateWallet(c *gin.Context) {
 // @Router      /wallets/{id} [delete]
 func (r *walletRoutes) DeleteWallet(c *gin.Context) {
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam) // Convert string to int
+	id, err := strconv.Atoi(idParam)
 	if err != nil {
 		r.l.Error(err, "http - v1 - DeleteWallet - invalid ID format")
 		errorResponse(c, http.StatusBadRequest, "Invalid wallet ID")

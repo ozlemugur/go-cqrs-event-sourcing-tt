@@ -12,20 +12,9 @@ PATH:=$(LOCAL_BIN):$(PATH)
 help: ## Display this help screen
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
-
-swag-wallet: ## swag wallet-management-service init
-	go install github.com/swaggo/swag/cmd/swag@latest
-	( cd wallet-management-service && swag init -g internal/controller/http/v1/router.go -o docs )
-.PHONY: swag-wallet
-
-swag-asset: ##  swag asset-management-service init
-	go install github.com/swaggo/swag/cmd/swag@latest
-	(cd asset-management-service && swag init -g internal/controller/http/v1/router.go -o docs)
-.PHONY: swag-asset
-
 swag-query: ##  swag asset-query-service init
 	go install github.com/swaggo/swag/cmd/swag@latest
-	(cd asset-query-service && swag init -g internal/controller/http/v1/router.go -o docs)
+	( swag init -g internal/controller/http/v1/router.go -o docs)
 .PHONY: swag-query
 
 prepare: ##  prepare the environment

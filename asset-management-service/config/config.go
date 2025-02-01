@@ -14,6 +14,7 @@ type (
 		Log   `yaml:"logger"`
 		PG    `yaml:"postgres"`
 		Mocky `yaml:"mocky"`
+		Kafka `yaml:"kafka"`
 	}
 
 	// App -.
@@ -39,6 +40,10 @@ type (
 	}
 	Mocky struct {
 		URL string `env-required:"true"    `
+	}
+	Kafka struct {
+		KAFKA_BROKER string `env-required:"true"  yaml:"KAFKA_BROKER"  env:"KAFKA_BROKER"`
+		EVENT_TOPIC  string `env-required:"true"  yaml:"EVENT_TOPIC"  env:"EVENT_TOPIC"`
 	}
 )
 

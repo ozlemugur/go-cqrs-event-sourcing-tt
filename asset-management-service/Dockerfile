@@ -23,6 +23,9 @@ RUN CGO_ENABLED=1  GO111MODULE=on GOOS=linux  GOARCH=amd64  \
 
 # Step 3: Final
 FROM --platform=linux/amd64  golang:1.22-bullseye
+ENV TZ=Europe/Istanbul
+ENV TZ=Europe/Istanbul
+RUN apt-get update && apt-get install -y tzdata
 COPY --from=builder /app/config /config
 COPY --from=builder /bin/asset-management-service /asset-management-service
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
@@ -30,7 +33,7 @@ RUN pwd
 WORKDIR /
 RUN echo "Listing /app directory..." && ls -l /config && ls -l 
 
-RUN ls -l /config && ls -l /asset-query-processor
+RUN ls -l /config && ls -l /asset-management-service
 
 CMD ["/asset-management-service"]
 

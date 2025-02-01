@@ -3,7 +3,9 @@ package v1
 
 import (
 	"net/http"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	swaggerFiles "github.com/swaggo/files"
@@ -17,15 +19,23 @@ import (
 
 // NewRouter -.
 // Swagger spec:
-// @title       Automatic Message Sender API
-// @description The system sends 2 messages every 2 minutes.
+// @title       Asset Management Service
+// @description Asset Management Service
 // @version     1.0
-// @host        localhost:8080
+// @host        localhost:8082
 // @BasePath    /v1
 func NewRouter(handler *gin.Engine, l logger.Interface, t usecase.AssetHandler) {
 	// Options
 	handler.Use(gin.Logger())
 	handler.Use(gin.Recovery())
+
+	handler.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:8081"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	// Swagger
 	swaggerHandler := ginSwagger.DisablingWrapHandler(swaggerFiles.Handler, "DISABLE_SWAGGER_HTTP_HANDLER")
@@ -36,6 +46,8 @@ func NewRouter(handler *gin.Engine, l logger.Interface, t usecase.AssetHandler) 
 
 	// Prometheus metrics
 	handler.GET("/metrics", gin.WrapH(promhttp.Handler()))
+
+	l.Info("Asset Management Service http://localhost:8082/swagger/index.html")
 
 	// Routers
 	h := handler.Group("/v1")

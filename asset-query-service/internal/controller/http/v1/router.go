@@ -3,7 +3,9 @@ package v1
 
 import (
 	"net/http"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	swaggerFiles "github.com/swaggo/files"
@@ -27,6 +29,14 @@ func NewRouter(handler *gin.Engine, l logger.Interface, t usecase.WalletQueryHan
 	handler.Use(gin.Logger())
 	handler.Use(gin.Recovery())
 
+	handler.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:8081"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+
 	// Swagger
 	swaggerHandler := ginSwagger.DisablingWrapHandler(swaggerFiles.Handler, "DISABLE_SWAGGER_HTTP_HANDLER")
 	handler.GET("/swagger/*any", swaggerHandler)
@@ -37,7 +47,7 @@ func NewRouter(handler *gin.Engine, l logger.Interface, t usecase.WalletQueryHan
 	// Prometheus metrics
 	handler.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
-	l.Info("http://localhost:8080/swagger/index.html")
+	l.Info("Asset Query Service:  http://localhost:8083/swagger/index.html")
 
 	// Routers
 	h := handler.Group("/v1")

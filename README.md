@@ -148,6 +148,10 @@ https://rmoff.net/2020/07/08/learning-golang-some-rough-notes-s02e01-my-first-ka
 https://www.confluent.io/blog/kafka-client-cannot-connect-to-broker-on-aws-on-docker-etc/?_ga=2.22978111.580618518.1738428927-1331267361.1736872468&_gac=1.94810862.1736872468.Cj0KCQiAs5i8BhDmARIsAGE4xHxp7cJDnwjj6fx0moULDU_FyboI4QVgheDN9oljO42ZmQjzsPPLhi4aAnHeEALw_wcB&_gl=1*7tf3yx*_gcl_aw*R0NMLjE3MzY4NzI0NjguQ2owS0NRaUFzNWk4QmhEbUFSSXNBR0U0eEh4cDdjSkRud2pqNmZ4MG1vVUxEVV9GeWJvSTRRVmdoZUROOW9sak80MlptUWp6c1BQTGhpNGFBbkhlRUFMd193Y0I.*_gcl_au*MzYwNjQwMjcyLjE3MzY4NzI0Njg.*_ga*MTMzMTI2NzM2MS4xNzM2ODcyNDY4*_ga_D2D3EGKSGD*MTczODQzNDE3Ni42LjAuMTczODQzNDE3Ni42MC4wLjA.
 
 
+docker-compose logs --timestamps
+
+
+docker exec -it 2fd97f3bef73 psql -U wallet_user -d wallet_db
 
 
 TODOS:

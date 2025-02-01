@@ -81,8 +81,11 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      TZ: Europe/Istanbul
     volumes:
       - kafka-data:/var/lib/kafka/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
     command: >
       bash -c "
       echo 'broker.id=1' > /etc/kafka/kafka.properties &&

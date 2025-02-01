@@ -1,12 +1,12 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "The system sends 2 messages every 2 minutes.",
-        "title": "Automatic Message Sender API",
+        "description": "Asset Management Service",
+        "title": "Asset Management Service",
         "contact": {},
         "version": "1.0"
     },
-    "host": "localhost:8080",
+    "host": "localhost:8082",
     "basePath": "/v1",
     "paths": {
         "/assets/deposit": {

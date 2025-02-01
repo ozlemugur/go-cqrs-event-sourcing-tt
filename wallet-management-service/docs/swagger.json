@@ -6,7 +6,7 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "localhost:8080",
+    "host": "localhost:8081",
     "basePath": "/v1",
     "paths": {
         "/wallets": {
@@ -27,10 +27,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/v1.walletResponse"
-                            }
+                            "$ref": "#/definitions/v1.walletResponse"
                         }
                     },
                     "500": {
@@ -235,15 +232,33 @@
         }
     },
     "definitions": {
+        "entity.Asset": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "entity.Wallet": {
             "type": "object",
             "properties": {
                 "address": {
-                    "description": "Wallet address",
                     "type": "string"
                 },
+                "assets": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.Asset"
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                },
                 "network": {
-                    "description": "Wallet network",
                     "type": "string"
                 }
             }

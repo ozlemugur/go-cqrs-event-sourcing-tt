@@ -62,7 +62,8 @@ docker-rm-volume: ##  remove docker volume
 	docker volume rm go-cqrs-event-sourcing-tt_pg-data
 .PHONY: docker-rm-volume
 
-migrate-create:  ##  create new migration
+
+migrate-create:  ##  create new migration from sql
 	migrate create -ext sql -dir migrations 'migrate_name_messages'
 .PHONY: migrate-create
 

@@ -14,27 +14,26 @@ import (
 	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/pkg/httpserver"
 	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/pkg/kafka/producer"
 	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/pkg/logger"
-	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/pkg/postgres"
 )
 
 func Run(cfg *config.Config) {
 	l := logger.New(cfg.Log.Level)
 
-	// Repository
-	pg, err := postgres.New(cfg.PG.URL, postgres.MaxPoolSize(cfg.PG.PoolMax))
-	if err != nil {
-		l.Fatal(fmt.Errorf("app - Run - postgres.New: %w", err))
-	}
-	defer pg.Close()
+	kafkaBroker := cfg.Kafka.KAFKA_BROKER // os.Getenv("KAFKA_BROKER")      // e.g., "kafka:9092"
+	l.Error("KAFKA_BROKER")
+	l.Error(kafkaBroker)
+	eventTopic := cfg.Kafka.EVENT_TOPIC // e.g., "event-journal"
+	l.Error("EVENT_TOPIC")
+	l.Error(eventTopic)
 
 	// Initialize Kafka Producer
-	kafkaProducer, err := producer.NewKafkaProducer("kafka:9092")
+	kafkaProducer, err := producer.NewKafkaProducer(kafkaBroker)
 	if err != nil {
 		l.Fatal(" Failed to initialize Kafka producer: %v", err)
 	}
 	defer kafkaProducer.Close() // Ensure producer is closed on shutdown
 
-	eventJournal := eventjournal.NewKafkaEventJournal(kafkaProducer, "event-journal")
+	eventJournal := eventjournal.NewKafkaEventJournal(kafkaProducer, eventTopic)
 
 	assetUseCase := usecase.NewAssetUseCase(
 		eventJournal,

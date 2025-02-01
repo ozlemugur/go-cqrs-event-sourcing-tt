@@ -23,6 +23,8 @@ RUN CGO_ENABLED=1  GO111MODULE=on GOOS=linux  GOARCH=amd64  \
 
 # Step 3: Final
 FROM --platform=linux/amd64  golang:1.22-bullseye
+ENV TZ=Europe/Istanbul
+RUN apt-get update && apt-get install -y tzdata
 COPY --from=builder /app/config /config
 COPY --from=builder /bin/asset-query-processor /asset-query-processor
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/

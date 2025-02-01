@@ -3,7 +3,7 @@ app:
   version: '1.0.0'
 
 http:
-  port: '8080'
+  port: '8082'
 
 
 logger:
@@ -17,4 +17,8 @@ postgres:
 
 mocky:
   url: 'https://run.mocky.io/v3/867bd0cd-d166-4885-bc1f-32894a3ff73a'
+
+kafka:
+  KAFKA_BROKER: '127.0.0.1:9092'
+  EVENT_TOPIC: 'event-journal'
 

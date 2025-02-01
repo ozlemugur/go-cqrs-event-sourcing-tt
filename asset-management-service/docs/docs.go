@@ -289,11 +289,11 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "localhost:8082",
 	BasePath:         "/v1",
 	Schemes:          []string{},
-	Title:            "Automatic Message Sender API",
-	Description:      "The system sends 2 messages every 2 minutes.",
+	Title:            "Asset Management Service",
+	Description:      "Asset Management Service",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

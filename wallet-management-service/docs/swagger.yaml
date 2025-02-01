@@ -1,12 +1,23 @@
 basePath: /v1
 definitions:
+  entity.Asset:
+    properties:
+      amount:
+        type: number
+      name:
+        type: string
+    type: object
   entity.Wallet:
     properties:
       address:
-        description: Wallet address
         type: string
+      assets:
+        items:
+          $ref: '#/definitions/entity.Asset'
+        type: array
+      id:
+        type: integer
       network:
-        description: Wallet network
         type: string
     type: object
   v1.response:
@@ -28,7 +39,7 @@ definitions:
           $ref: '#/definitions/entity.Wallet'
         type: array
     type: object
-host: localhost:8080
+host: localhost:8081
 info:
   contact: {}
   description: Wallet Management
@@ -47,9 +58,7 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/v1.walletResponse'
-            type: array
+            $ref: '#/definitions/v1.walletResponse'
         "500":
           description: Internal Server Error
           schema:

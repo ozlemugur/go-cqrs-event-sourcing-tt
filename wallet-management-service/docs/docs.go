@@ -33,10 +33,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/v1.walletResponse"
-                            }
+                            "$ref": "#/definitions/v1.walletResponse"
                         }
                     },
                     "500": {
@@ -241,15 +238,33 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "entity.Asset": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "entity.Wallet": {
             "type": "object",
             "properties": {
                 "address": {
-                    "description": "Wallet address",
                     "type": "string"
                 },
+                "assets": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.Asset"
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                },
                 "network": {
-                    "description": "Wallet network",
                     "type": "string"
                 }
             }
@@ -289,7 +304,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "localhost:8081",
 	BasePath:         "/v1",
 	Schemes:          []string{},
 	Title:            "Wallet Management Service",
