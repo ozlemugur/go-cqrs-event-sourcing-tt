@@ -1,6 +1,6 @@
 ![go-clean-arch-tt](docs/img/purpleGopher.svg)
 
-# go clean cqrs event sourcing (tahassurtalih)
+# go clean architecture (tahassurtalih)
 
 
 
@@ -48,8 +48,105 @@ no matching versions for query "latest"
 ** konfigurasyonların envden alınmasını ayarla.
 ** Kraft mode çalışılabilir.
 
-** docker builder prune
-** docker system prune -a
+
+** docker builder prune -f 
+** docker system prune -a 
+--no-cache kullanımı 
+
+compose-up-app: ##  ddd
+	docker-compose build --no-cache asset-query-processor
+	docker-compose up  -d asset-query-processor   && docker-compose logs -f
+.PHONY: compose-up-app
+
+
+
+*** docker build --progress=plain --no-cache -t asset-query-processor .
+Bu komut:
+	•	--progress=plain: Daha ayrıntılı log verir.
+	•	--no-cache: Önceden cache’lenmiş adımları kullanmaz.
+	•	-t asset-query-processor: Image’e bir ad verir.
+	•	.: Dockerfile’ın bulunduğu dizini işaret eder (mevcut dizin).
+
+*** docker run -it --rm  asset-query-processor sh
+*** docker run --platform linux/amd64 -it --rm asset-query-processor sh
+
+
+
+
+git pull --rebase origin main 
+Bu komut uzak branch’i kendi branch’inin üzerine taşıyarak commit geçmişini temiz tutar.
+
+git config pull.rebase false  # Merge yöntemi varsayılan olur
+
+git config pull.rebase true   # Rebase yöntemi varsayılan olur
+
+git config --global pull.rebase false
+
+
+notes:
+
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug API",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}/asset-query-processor/cmd/app",// The main directory of the application
+            "cwd": "${workspaceFolder}/asset-query-processor",
+            "env": {
+                "GIN_MODE": "debug", // Environment variables
+                "CONFIG_PATH": "./config/config.yml"
+            },
+            "args": [] // Add any arguments required for your API to run here
+        }
+    ]
+}
+
+
+
+%3|1738428059.880|FAIL|rdkafka#consumer-1| [thrd:kafka:9092/bootstrap]: kafka:9092/bootstrap: Connect to ipv4#172.18.0.4:9092 failed: Connection refused (after 8ms in state CONNECT)
+
+docker network inspect go-cqrs-event-sourcing-tt_custom-network
+
+
+
+
+docker exec -it e48e20783d31 sh
+
+kafka-topics --list --bootstrap-server kafka:9092
+
+
+
+ozlemugur@cassandra go-cqrs-event-sourcing-tt % docker exec -it e48e20783d31 sh
+sh-4.4$ kafka-topics --list --bootstrap-server kafka:9092
+__consumer_offsets
+sh-4.4$ kafka-topics --create --bootstrap-server localhost:9092 --topic event_journal --partitions 3 --replication-factor 1
+WARNING: Due to limitations in metric names, topics with a period ('.') or underscore ('_') could collide. To avoid issues it is best to use either, but not both.
+Created topic event_journal.
+sh-4.4$ kafka-topics --create --bootstrap-server localhost:9092 --topic event-journal --partitions 3 --replication-factor 1
+Created topic event-journal.
+sh-4.4$ kafka-topics --list --bootstrap-server localhost:9092
+__consumer_offsets
+event-journal
+event_journal
+sh-4.4$ kafka-topics --delete --bootstrap-server localhost:9092 --topic event_journal
+sh-4.4$ kafka-topics --list --bootstrap-server localhost:9092
+__consumer_offsets
+event-journal
+
+
+
+
+timeout 5 bash -c 'cat < /dev/tcp/kafka/9092'
+
+I'm gonna kill myself:
+
+https://rmoff.net/2020/07/08/learning-golang-some-rough-notes-s02e01-my-first-kafka-go-producer/
+
+https://www.confluent.io/blog/kafka-client-cannot-connect-to-broker-on-aws-on-docker-etc/?_ga=2.22978111.580618518.1738428927-1331267361.1736872468&_gac=1.94810862.1736872468.Cj0KCQiAs5i8BhDmARIsAGE4xHxp7cJDnwjj6fx0moULDU_FyboI4QVgheDN9oljO42ZmQjzsPPLhi4aAnHeEALw_wcB&_gl=1*7tf3yx*_gcl_aw*R0NMLjE3MzY4NzI0NjguQ2owS0NRaUFzNWk4QmhEbUFSSXNBR0U0eEh4cDdjSkRud2pqNmZ4MG1vVUxEVV9GeWJvSTRRVmdoZUROOW9sak80MlptUWp6c1BQTGhpNGFBbkhlRUFMd193Y0I.*_gcl_au*MzYwNjQwMjcyLjE3MzY4NzI0Njg.*_ga*MTMzMTI2NzM2MS4xNzM2ODcyNDY4*_ga_D2D3EGKSGD*MTczODQzNDE3Ni42LjAuMTczODQzNDE3Ni42MC4wLjA.
+
 
 
 

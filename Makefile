@@ -34,27 +34,24 @@ prepare: ##  prepare the environment
 .PHONY: prepare
 
 compose-up: ##  Run docker-compose 
-	docker-compose up --build -d  wallet-db  query-db kafka wallet-management-service   asset-query-service   asset-query-processor && docker-compose logs -f
+	docker-compose up --build -d  wallet-db  query-db kafka wallet-management-service   asset-query-service   asset-query-processor  asset-management-service && docker-compose logs -f
 .PHONY: compose-up
 
 compose-up-db: ##  Run docker-compose databases
 	docker-compose up --build -d  wallet-db  query-db kafka && docker-compose logs -f
 .PHONY: compose-up
 
-compose-up-app: ##  ddd
-	docker-compose build --no-cache asset-query-processor
-	docker-compose up  -d asset-query-processor   && docker-compose logs -f
+compose-up-app: ##  compose up just apss
+	docker-compose build --no-cache  wallet-management-service  asset-query-service   asset-query-processor  asset-management-service
+	docker-compose up  -d wallet-management-service  asset-query-service   asset-query-processor  asset-management-service   && docker-compose logs -f
 .PHONY: compose-up-app
-
-compose-up-without-app: ##  Run docker-compose without app
-	docker-compose up --build -d wallet-db && docker-compose logs -f
-.PHONY: compose-up-without-app
-
 
 
 compose-down: ##  Down docker-compose
 	docker-compose down --remove-orphans
 .PHONY: compose-down
+
+
 
 run: swag-v1 ## swag run and migrate
 	go mod tidy && go mod download && \
