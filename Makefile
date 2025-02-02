@@ -34,7 +34,7 @@ prepare: ##  prepare the environment
 .PHONY: prepare
 
 compose-up: ##  Run docker-compose 
-	docker-compose up --build -d  wallet-db  query-db kafka wallet-management-service   asset-query-service   asset-query-processor  asset-management-service && docker-compose logs -f
+	docker-compose up --build -d  wallet-db  query-db kafka wallet-management-service   asset-query-service   asset-query-processor  asset-management-service kafdrop && docker-compose logs -f
 .PHONY: compose-up
 
 compose-up-db: ##  Run docker-compose databases

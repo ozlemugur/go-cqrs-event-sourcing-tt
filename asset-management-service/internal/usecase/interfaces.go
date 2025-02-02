@@ -10,10 +10,10 @@ import (
 type (
 	/* Asset Management UseCase Interface */
 	AssetHandler interface {
-		Withdraw(ctx context.Context, walletID int, amount float64) error                       // Withdraw funds from a wallet
-		Deposit(ctx context.Context, walletID int, amount float64) error                        // Deposit funds into a wallet
-		Transfer(ctx context.Context, fromWalletID int, toWalletID int, amount float64) error   // Transfer funds between wallets
-		ScheduleTransaction(ctx context.Context, transaction entity.ScheduledTransaction) error // Schedule a future transaction
+		Withdraw(ctx context.Context, walletID int, assetName string, amount float64) error                     // Withdraw funds from a wallet
+		Deposit(ctx context.Context, walletID int, assetName string, amount float64) error                      // Deposit funds into a wallet
+		Transfer(ctx context.Context, fromWalletID int, toWalletID int, assetName string, amount float64) error // Transfer funds between wallets
+		//ScheduleTransaction(ctx context.Context, transaction entity.ScheduledTransactionRequest) error          // Schedule a future transaction
 	}
 
 	/* Asset Repository Interface */

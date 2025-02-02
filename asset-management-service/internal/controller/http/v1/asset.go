@@ -52,7 +52,8 @@ func (r *assetRoutes) Withdraw(c *gin.Context) {
 		return
 	}
 
-	if err := r.t.Withdraw(c.Request.Context(), req.WalletID, req.Amount); err != nil {
+	// Include asset_name in the use case call
+	if err := r.t.Withdraw(c.Request.Context(), req.WalletID, req.AssetName, req.Amount); err != nil {
 		r.l.Error(err, "http - v1 - Withdraw - use case error")
 		errorResponse(c, http.StatusInternalServerError, "Withdraw failed")
 		return
@@ -80,7 +81,8 @@ func (r *assetRoutes) Deposit(c *gin.Context) {
 		return
 	}
 
-	if err := r.t.Deposit(c.Request.Context(), req.WalletID, req.Amount); err != nil {
+	// Include asset_name in the use case call
+	if err := r.t.Deposit(c.Request.Context(), req.WalletID, req.AssetName, req.Amount); err != nil {
 		r.l.Error(err, "http - v1 - Deposit - use case error")
 		errorResponse(c, http.StatusInternalServerError, "Deposit failed")
 		return
@@ -108,7 +110,8 @@ func (r *assetRoutes) Transfer(c *gin.Context) {
 		return
 	}
 
-	if err := r.t.Transfer(c.Request.Context(), req.FromWalletID, req.ToWalletID, req.Amount); err != nil {
+	// Include asset_name in the use case call
+	if err := r.t.Transfer(c.Request.Context(), req.FromWalletID, req.ToWalletID, req.AssetName, req.Amount); err != nil {
 		r.l.Error(err, "http - v1 - Transfer - use case error")
 		errorResponse(c, http.StatusInternalServerError, "Transfer failed")
 		return
@@ -123,24 +126,25 @@ func (r *assetRoutes) Transfer(c *gin.Context) {
 // @Tags        assets
 // @Accept      json
 // @Produce     json
-// @Param       request body entity.ScheduledTransaction true "Scheduled transaction request"
+// @Param       request body entity.ScheduledTransactionRequest true "Scheduled transaction request"
 // @Success     200 {object} assetResponse
 // @Failure     400 {object} assetResponse
 // @Failure     500 {object} assetResponse
 // @Router      /assets/schedule [post]
 func (r *assetRoutes) ScheduleTransaction(c *gin.Context) {
-	var req entity.ScheduledTransaction
+	var req entity.ScheduledTransactionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		r.l.Error(err, "http - v1 - ScheduleTransaction - invalid input")
 		errorResponse(c, http.StatusBadRequest, "Invalid input")
 		return
 	}
 
-	if err := r.t.ScheduleTransaction(c.Request.Context(), req); err != nil {
-		r.l.Error(err, "http - v1 - ScheduleTransaction - use case error")
-		errorResponse(c, http.StatusInternalServerError, "Scheduling failed")
-		return
-	}
+	// Include asset_name in the use case call
+	//	if err := r.t.ScheduleTransaction(c.Request.Context(), req); err != nil {
+	//		r.l.Error(err, "http - v1 - ScheduleTransaction - use case error")
+	//		errorResponse(c, http.StatusInternalServerError, "Scheduling failed")
+	//		return
+	//	}
 
 	c.JSON(http.StatusOK, assetResponse{Status: "success"})
 }

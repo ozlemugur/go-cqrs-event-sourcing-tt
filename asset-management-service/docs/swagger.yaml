@@ -1,41 +1,16 @@
 basePath: /v1
 definitions:
-  entity.ScheduledTransaction:
+  entity.ScheduledTransactionRequest:
     properties:
       amount:
+        description: Amount to transfer
         type: number
-      created_at:
+      asset_name:
+        description: Asset to transfer
         type: string
       execute_time:
-        description: When this should be executed
-        type: string
-      from_wallet:
+        description: Execution time (Unix timestamp)
         type: integer
-      id:
-        type: integer
-      status:
-        description: '"scheduled", "executed"'
-        type: string
-      to_wallet:
-        type: integer
-    type: object
-  entity.TransactionRequest:
-    properties:
-      amount:
-        description: Transaction amount
-        type: number
-      wallet_id:
-        description: Wallet performing the transaction
-        type: integer
-    required:
-    - amount
-    - wallet_id
-    type: object
-  entity.TransferRequest:
-    properties:
-      amount:
-        description: Transfer amount
-        type: number
       from_wallet_id:
         description: Sender wallet
         type: integer
@@ -44,6 +19,44 @@ definitions:
         type: integer
     required:
     - amount
+    - asset_name
+    - execute_time
+    - from_wallet_id
+    - to_wallet_id
+    type: object
+  entity.TransactionRequest:
+    properties:
+      amount:
+        description: Transaction amount
+        type: number
+      asset_name:
+        description: Asset being transacted (e.g., BTC, ETH)
+        type: string
+      wallet_id:
+        description: Wallet performing the transaction
+        type: integer
+    required:
+    - amount
+    - asset_name
+    - wallet_id
+    type: object
+  entity.TransferRequest:
+    properties:
+      amount:
+        description: Transfer amount
+        type: number
+      asset_name:
+        description: Asset being transferred
+        type: string
+      from_wallet_id:
+        description: Sender wallet
+        type: integer
+      to_wallet_id:
+        description: Receiver wallet
+        type: integer
+    required:
+    - amount
+    - asset_name
     - from_wallet_id
     - to_wallet_id
     type: object
@@ -104,7 +117,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/entity.ScheduledTransaction'
+          $ref: '#/definitions/entity.ScheduledTransactionRequest'
       produces:
       - application/json
       responses:

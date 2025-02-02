@@ -147,6 +147,15 @@ services:
       - kafka
     ports:
       - "8082:8080"
+      
+  kafdrop:
+    image: obsidiandynamics/kafdrop
+    ports:
+    - "9000:9000"
+    environment:
+     KAFKA_BROKER_CONNECT: kafka:9092
+    depends_on:
+      - kafka
 
 
 volumes:

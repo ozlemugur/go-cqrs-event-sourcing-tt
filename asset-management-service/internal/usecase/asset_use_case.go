@@ -25,11 +25,12 @@ func NewAssetUseCase(eventJournal EventJournal, l logger.Interface) *AssetUseCas
 }
 
 // Withdraw funds from a wallet (Publishes event)
-func (uc *AssetUseCase) Withdraw(ctx context.Context, walletID int, amount float64) error {
+func (uc *AssetUseCase) Withdraw(ctx context.Context, walletID int, assetName string, amount float64) error {
 	event := entity.WalletEvent{
 		EventID:   uuid.New().String(),
 		WalletID:  walletID,
 		Type:      "withdraw",
+		AssetName: assetName,
 		Amount:    amount,
 		Timestamp: time.Now().Unix(),
 	}
@@ -38,16 +39,18 @@ func (uc *AssetUseCase) Withdraw(ctx context.Context, walletID int, amount float
 		return fmt.Errorf("Withdraw - PublishEvent: %w", err)
 	}
 
-	uc.log.Info("Withdraw event published", "WalletID", walletID, "Amount", amount)
+	uc.log.Info("Withdraw event published", "WalletID", walletID, "AssetName", assetName, "Amount", amount)
 	return nil
 }
 
 // Deposit funds into a wallet (Publishes event)
-func (uc *AssetUseCase) Deposit(ctx context.Context, walletID int, amount float64) error {
+func (uc *AssetUseCase) Deposit(ctx context.Context, walletID int, assetName string, amount float64) error {
+	//wallet check , ya header üzerinden teyitli geldiğini var sayabiliriz ya da httpcall ve ya readonly bir check yapabiliriz
 	event := entity.WalletEvent{
 		EventID:   uuid.New().String(),
 		WalletID:  walletID,
 		Type:      "deposit",
+		AssetName: assetName,
 		Amount:    amount,
 		Timestamp: time.Now().Unix(),
 	}
@@ -56,16 +59,18 @@ func (uc *AssetUseCase) Deposit(ctx context.Context, walletID int, amount float6
 		return fmt.Errorf("Deposit - PublishEvent: %w", err)
 	}
 
-	uc.log.Info("Deposit event published", "WalletID", walletID, "Amount", amount)
+	uc.log.Info("Deposit event published", "WalletID", walletID, "AssetName", assetName, "Amount", amount)
 	return nil
 }
 
 // Transfer funds between wallets (Publishes two events: Withdraw + Deposit)
-func (uc *AssetUseCase) Transfer(ctx context.Context, fromWalletID, toWalletID int, amount float64) error {
+func (uc *AssetUseCase) Transfer(ctx context.Context, fromWalletID, toWalletID int, assetName string, amount float64) error {
+	// TODO: balance check gerekiyor
 	withdrawEvent := entity.WalletEvent{
 		EventID:   uuid.New().String(),
 		WalletID:  fromWalletID,
 		Type:      "withdraw",
+		AssetName: assetName,
 		Amount:    amount,
 		Timestamp: time.Now().Unix(),
 	}
@@ -74,6 +79,7 @@ func (uc *AssetUseCase) Transfer(ctx context.Context, fromWalletID, toWalletID i
 		EventID:   uuid.New().String(),
 		WalletID:  toWalletID,
 		Type:      "deposit",
+		AssetName: assetName,
 		Amount:    amount,
 		Timestamp: time.Now().Unix(),
 	}
@@ -86,137 +92,27 @@ func (uc *AssetUseCase) Transfer(ctx context.Context, fromWalletID, toWalletID i
 		return fmt.Errorf("Transfer - Deposit PublishEvent: %w", err)
 	}
 
-	uc.log.Info("Transfer events published", "FromWalletID", fromWalletID, "ToWalletID", toWalletID, "Amount", amount)
+	uc.log.Info("Transfer events published", "FromWalletID", fromWalletID, "ToWalletID", toWalletID, "AssetName", assetName, "Amount", amount)
 	return nil
 }
 
-// Schedule a future transaction (Publishes event)
-func (uc *AssetUseCase) ScheduleTransaction(ctx context.Context, transaction entity.ScheduledTransaction) error {
+/*
+// Schedule a future transaction (Publishes event) this feature will implement differently
+func (uc *AssetUseCase) ScheduleTransaction(ctx context.Context, transaction entity.ScheduledTransactionRequest) error {
 	//transaction.ID = uuid.New().String()
-	/*	event := entity.ScheduledTransactionEvent{
-			EventID:     transaction.ID,
-			WalletID:    transaction.FromWallet,
-			Type:        ,
-			Amount:      transaction.Amount,
-			ExecuteTime: transaction.ExecuteTime.Unix(),
-		}
 
-		if err := uc.eventJournal.PublishEvent(ctx, event); err != nil {
-			return fmt.Errorf("ScheduleTransaction - PublishEvent: %w", err)
-		}
-	*/
-	uc.log.Info("Scheduled transaction event published", "TransactionID", transaction.ID, "ExecuteTime", transaction.ExecuteTime)
-	return nil
-}
+	/*event := entity.ScheduledTransactionEvent{
+		EventID:     transaction.ID,
+		WalletID:    transaction.FromWallet,
+		Type:        "scheduled_transaction",
+		AssetName:   transaction.AssetName,
+		Amount:      transaction.Amount,
+		ExecuteTime: transaction.ExecuteTime.Unix(),
+	} */
 
-/*package usecase
+/*if err := uc.eventJournal.PublishEvent(ctx, event); err != nil {
+	return fmt.Errorf("ScheduleTransaction - PublishEvent: %w", err)
+} */
 
-import (
-	"context"
-	"fmt"
-	"time"
-
-	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/asset-management-service/internal/entity"
-	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/pkg/logger"
-)
-
-type AssetUseCase struct {
-	repo AssetRepositoryHandler
-	log  logger.Interface
-}
-
-// NewAssetUseCase - Creates a new asset use case
-func NewAssetUseCase(r AssetRepositoryHandler, l logger.Interface) *AssetUseCase {
-	return &AssetUseCase{
-		repo: r,
-		log:  l,
-	}
-}
-
-
-// Withdraw funds from a wallet
-func (uc *AssetUseCase) Withdraw(ctx context.Context, walletID int, amount float64) error {
-	balance, err := uc.repo.GetBalance(ctx, walletID)
-	if err != nil {
-		return fmt.Errorf("Withdraw - GetBalance: %w", err)
-	}
-
-	if balance < amount {
-		return fmt.Errorf("Withdraw - insufficient funds")
-	}
-
-	newBalance := balance - amount
-	if err := uc.repo.UpdateBalance(ctx, walletID, newBalance); err != nil {
-		return fmt.Errorf("Withdraw - UpdateBalance: %w", err)
-	}
-
-	transaction := entity.Transaction{
-		WalletID:  walletID,
-		Type:      "withdraw",
-		Amount:    amount,
-		Status:    "completed",
-		CreatedAt: time.Now(),
-	}
-	if err := uc.repo.InsertTransaction(ctx, transaction); err != nil {
-		return fmt.Errorf("Withdraw - InsertTransaction: %w", err)
-	}
-
-	uc.log.Info("Withdraw successful", "WalletID", walletID, "Amount", amount)
-	return nil
-}
-
-// Deposit funds into a wallet
-func (uc *AssetUseCase) Deposit(ctx context.Context, walletID int, amount float64) error {
-	balance, err := uc.repo.GetBalance(ctx, walletID)
-	if err != nil {
-		return fmt.Errorf("Deposit - GetBalance: %w", err)
-	}
-
-	newBalance := balance + amount
-	if err := uc.repo.UpdateBalance(ctx, walletID, newBalance); err != nil {
-		return fmt.Errorf("Deposit - UpdateBalance: %w", err)
-	}
-
-	transaction := entity.Transaction{
-		WalletID:  walletID,
-		Type:      "deposit",
-		Amount:    amount,
-		Status:    "completed",
-		CreatedAt: time.Now(),
-	}
-	if err := uc.repo.InsertTransaction(ctx, transaction); err != nil {
-		return fmt.Errorf("Deposit - InsertTransaction: %w", err)
-	}
-
-	uc.log.Info("Deposit successful", "WalletID", walletID, "Amount", amount)
-	return nil
-}
-
-// Transfer funds between wallets
-func (uc *AssetUseCase) Transfer(ctx context.Context, fromWalletID, toWalletID int, amount float64) error {
-	// Withdraw from sender wallet
-	if err := uc.Withdraw(ctx, fromWalletID, amount); err != nil {
-		return fmt.Errorf("Transfer - Withdraw: %w", err)
-	}
-
-	// Deposit into receiver wallet
-	if err := uc.Deposit(ctx, toWalletID, amount); err != nil {
-		// Rollback: Revert the withdrawal if deposit fails
-		_ = uc.Deposit(ctx, fromWalletID, amount)
-		return fmt.Errorf("Transfer - Deposit: %w", err)
-	}
-
-	uc.log.Info("Transfer successful", "FromWalletID", fromWalletID, "ToWalletID", toWalletID, "Amount", amount)
-	return nil
-}
-
-// Schedule a future transaction
-func (uc *AssetUseCase) ScheduleTransaction(ctx context.Context, transaction entity.ScheduledTransaction) error {
-	if err := uc.repo.InsertScheduledTransaction(ctx, transaction); err != nil {
-		return fmt.Errorf("ScheduleTransaction - InsertScheduledTransaction: %w", err)
-	}
-
-	uc.log.Info("Scheduled transaction created", "TransactionID", transaction.ID, "ExecuteTime", transaction.ExecuteTime)
-	return nil
-}
-*/
+//uc.log.Info("Scheduled transaction event published", "TransactionID", transaction.ID, "AssetName", transaction.AssetName, "ExecuteTime", transaction.ExecuteTime)
+//} */

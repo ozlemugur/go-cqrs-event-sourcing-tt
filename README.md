@@ -1,7 +1,30 @@
-![go-clean-arch-tt](docs/img/purpleGopher.svg)
+![go-cqrs-event-sourcing-tt](docs/img/purpleGopher.svg)
 
-# go clean architecture (tahassurtalih)
+# go cqrs event sourcing / clean architecture based (tahassurtalih)
 
+
+
+kafdrop is serve here:  http://localhost:9000/
+
+kafdrop message decode
+
+echo "eyJldmVudF9pZCI6ImMwYjBiNTRhLTZjNDktNDg0OC05YjZhLTE0MTM1NjQwNTZjMSIsIndhbGxldF9pZCI6MSwiYXNzZXRfbmFtZSI6IkJUQyIsInR5cGUiOiJkZXBvc2l0IiwiYW1vdW50IjoxMDAsInRpbWVzdGFtcCI6MTczODQ5MjkxNH0=" | base64 --decode
+
+{"event_id":"c0b0b54a-6c49-4848-9b6a-1413564056c1","wallet_id":1,"asset_name":"BTC","type":"deposit","amount":100,"timestamp":1738492914}%   
+
+************************************************
+
+date -r 1738492914
+
+Unix Epoch Time formatında, yani 1970-01-01 00:00:00 UTC tarihinden itibaren geçen saniye sayısını temsil eder.
+
+************************************************
+
+netstat -tuln
+
+
+docker exec -it kafka bash
+kafka-console-consumer --bootstrap-server localhost:9092 --topic event-journal --from-beginning
 
 
 wallet management service sadece crud operasyonları için kullanılsın. (kendine özel postgresqli olacak, sadece bu işlemler için. created, updated, delete işlemleri için ayrıca diğer dblerle diyalog kurulabilir ama en sona koyabilirisn.)

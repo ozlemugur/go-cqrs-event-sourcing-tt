@@ -83,7 +83,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/entity.ScheduledTransaction"
+                            "$ref": "#/definitions/entity.ScheduledTransactionRequest"
                         }
                     }
                 ],
@@ -205,30 +205,34 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "entity.ScheduledTransaction": {
+        "entity.ScheduledTransactionRequest": {
             "type": "object",
+            "required": [
+                "amount",
+                "asset_name",
+                "execute_time",
+                "from_wallet_id",
+                "to_wallet_id"
+            ],
             "properties": {
                 "amount": {
+                    "description": "Amount to transfer",
                     "type": "number"
                 },
-                "created_at": {
+                "asset_name": {
+                    "description": "Asset to transfer",
                     "type": "string"
                 },
                 "execute_time": {
-                    "description": "When this should be executed",
-                    "type": "string"
-                },
-                "from_wallet": {
+                    "description": "Execution time (Unix timestamp)",
                     "type": "integer"
                 },
-                "id": {
+                "from_wallet_id": {
+                    "description": "Sender wallet",
                     "type": "integer"
                 },
-                "status": {
-                    "description": "\"scheduled\", \"executed\"",
-                    "type": "string"
-                },
-                "to_wallet": {
+                "to_wallet_id": {
+                    "description": "Receiver wallet",
                     "type": "integer"
                 }
             }
@@ -237,12 +241,17 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "amount",
+                "asset_name",
                 "wallet_id"
             ],
             "properties": {
                 "amount": {
                     "description": "Transaction amount",
                     "type": "number"
+                },
+                "asset_name": {
+                    "description": "Asset being transacted (e.g., BTC, ETH)",
+                    "type": "string"
                 },
                 "wallet_id": {
                     "description": "Wallet performing the transaction",
@@ -254,6 +263,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "amount",
+                "asset_name",
                 "from_wallet_id",
                 "to_wallet_id"
             ],
@@ -261,6 +271,10 @@ const docTemplate = `{
                 "amount": {
                     "description": "Transfer amount",
                     "type": "number"
+                },
+                "asset_name": {
+                    "description": "Asset being transferred",
+                    "type": "string"
                 },
                 "from_wallet_id": {
                     "description": "Sender wallet",
