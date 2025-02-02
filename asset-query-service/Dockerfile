@@ -15,10 +15,6 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
 
 # Step 3: Final
 FROM alpine:latest
-ENV TZ=Europe/Istanbul
-RUN apk add --no-cache tzdata \
-    && cp /usr/share/zoneinfo/$TZ /etc/localtime \
-    && echo $TZ > /etc/timezone
 COPY --from=builder /app/config /config
 COPY --from=builder /bin/asset-query-service /asset-query-service
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/

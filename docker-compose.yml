@@ -11,6 +11,8 @@ services:
       POSTGRES_DB: wallet_db
     volumes:
       - wallet-db-data:/var/lib/postgresql/data
+    
+
 
   # Wallet Management Service
   wallet-management-service:
@@ -20,6 +22,7 @@ services:
     environment:
       PG_URL: 'postgres://wallet_user:wallet_password@wallet-db:5432/wallet_db'
       LOG_LEVEL: trace
+      HTTP_PORT: 8080
     depends_on:
       - wallet-db
     ports:
@@ -35,9 +38,10 @@ services:
       POSTGRES_USER: query_user
       POSTGRES_PASSWORD: query_password
       POSTGRES_DB: query_db
-      LOG_LEVEL: trace
     volumes:
       - query-db-data:/var/lib/postgresql/data
+    
+
 
 
   # Asset Query Service (Reads from Query DB and Serves Clients)
@@ -54,6 +58,7 @@ services:
       QUERY_DB_NAME: query_db
       PG_URL: 'postgres://query_user:query_password@query-db:5432/query_db'
       LOG_LEVEL: trace
+      HTTP_PORT: 8080
     depends_on:
       - query-db
     ports:
@@ -137,6 +142,7 @@ services:
       KAFKA_BROKER: kafka:9092
       EVENT_TOPIC: event-journal  # Writes all transactions to this topic
       LOG_LEVEL: trace
+      HTTP_PORT: 8080
     depends_on:
       - kafka
     ports:

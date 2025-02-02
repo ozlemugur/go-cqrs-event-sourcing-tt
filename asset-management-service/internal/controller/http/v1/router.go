@@ -30,7 +30,7 @@ func NewRouter(handler *gin.Engine, l logger.Interface, t usecase.AssetHandler) 
 	handler.Use(gin.Recovery())
 
 	handler.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:8081"},
+		AllowOrigins:     []string{"http://localhost:8082"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		AllowCredentials: true,

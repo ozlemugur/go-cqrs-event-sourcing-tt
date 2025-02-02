@@ -22,7 +22,7 @@ import (
 // @title       Wallet Management Service
 // @description Wallet Management
 // @version     1.0
-// @host        localhost:8080
+// @host        localhost:8083
 // @BasePath    /v1
 func NewRouter(handler *gin.Engine, l logger.Interface, t usecase.WalletQueryHandler) {
 	// Options
@@ -30,7 +30,7 @@ func NewRouter(handler *gin.Engine, l logger.Interface, t usecase.WalletQueryHan
 	handler.Use(gin.Recovery())
 
 	handler.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:8081"},
+		AllowOrigins:     []string{"http://localhost:8083"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		AllowCredentials: true,

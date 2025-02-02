@@ -33,12 +33,13 @@ compose-up: ##  Run docker-compose
 .PHONY: compose-up
 
 compose-up-app: ##  ddd
-	docker-compose up --build -d asset-query-processor && docker-compose logs -f
+	docker-compose up --build -d wallet-management-service && docker-compose logs -f
 .PHONY: compose-up-app
 
 compose-down: ##  Down docker-compose
 	docker-compose down --remove-orphans
 .PHONY: compose-down
+
 
 
 migrate-create: ##  create new migration from sql

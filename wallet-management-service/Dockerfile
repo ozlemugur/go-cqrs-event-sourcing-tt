@@ -16,11 +16,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
 
 
 # Step 3: Final
-FROM alpine:latest
-ENV TZ=Europe/Istanbul
-RUN apk add --no-cache tzdata \
-    && cp /usr/share/zoneinfo/$TZ /etc/localtime \
-    && echo $TZ > /etc/timezone
+FROM alpine:latest 
 COPY --from=builder /app/config /config
 COPY --from=builder /bin/wallet-management-service /wallet-management-service
 COPY --from=builder /app/migrations /migrations
