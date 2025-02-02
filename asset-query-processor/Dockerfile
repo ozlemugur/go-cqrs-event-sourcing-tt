@@ -18,7 +18,7 @@ COPY . /app
 RUN echo "Listing /app directory..." && ls -l /app && ls -l /app/config
 WORKDIR /app
 RUN CGO_ENABLED=1  GO111MODULE=on GOOS=linux  GOARCH=amd64  \
-    go build -mod=vendor -o /bin/asset-query-processor  ./cmd/app 
+    go build -mod=vendor -tags migrate -o /bin/asset-query-processor  ./cmd/app 
   
 
 # Step 3: Final
@@ -27,6 +27,7 @@ ENV TZ=Europe/Istanbul
 RUN apt-get update && apt-get install -y tzdata
 COPY --from=builder /app/config /config
 COPY --from=builder /bin/asset-query-processor /asset-query-processor
+COPY --from=builder /app/migrations /migrations
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 RUN pwd
 WORKDIR /

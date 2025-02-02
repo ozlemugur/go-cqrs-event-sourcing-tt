@@ -3,6 +3,7 @@ services:
   # PostgreSQL for Wallet Management Service
   wallet-db:
     image: postgres:15
+    container_name: wallet-db
     ports:
       - "5432:5432"
     environment:
@@ -16,9 +17,11 @@ services:
 
   # Wallet Management Service
   wallet-management-service:
+    image:   wallet-management-service:latest
     build:
       context: ./wallet-management-service
       dockerfile: Dockerfile
+    container_name: wallet-management-service 
     environment:
       PG_URL: 'postgres://wallet_user:wallet_password@wallet-db:5432/wallet_db'
       LOG_LEVEL: trace
@@ -32,6 +35,7 @@ services:
   query-db:
     image: postgres:15
     restart: always
+    container_name: query-db
     ports:
       - "5433:5432"
     environment:
@@ -46,10 +50,12 @@ services:
 
   # Asset Query Service (Reads from Query DB and Serves Clients)
   asset-query-service:
+    image:   asset-query-service:latest
     build:
       context: ./asset-query-service
       dockerfile: Dockerfile
     restart: always
+    container_name: asset-query-service  
     environment:
       QUERY_DB_HOST: query-db
       QUERY_DB_PORT: 5432
@@ -72,6 +78,7 @@ services:
     ports:
       - "9092:9092"
       - "9093:9093"
+      - "9094:9094"
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: controller,broker
@@ -112,10 +119,12 @@ services:
 
   # Asset Query Processor (Consumes Kafka Events and Updates Query DB)
   asset-query-processor:
+    image:  asset-query-processor:latest
     build:
       context: ./asset-query-processor
       dockerfile: Dockerfile
     restart: always
+    container_name: asset-query-processor 
     environment:
       KAFKA_BROKER: kafka:9092
       EVENT_TOPIC: event-journal
@@ -134,10 +143,12 @@ services:
     
     # Asset Management Service (Command API - Writes to Kafka)
   asset-management-service:
+    image: asset-management-service:latest
     build:
       context: ./asset-management-service
       dockerfile: Dockerfile
     restart: always
+    container_name:  asset-management-service 
     environment:
       KAFKA_BROKER: kafka:9092
       EVENT_TOPIC: event-journal  # Writes all transactions to this topic
@@ -147,8 +158,9 @@ services:
       - kafka
     ports:
       - "8082:8080"
-      
+
   kafdrop:
+    container_name:  kafdrop 
     image: obsidiandynamics/kafdrop
     ports:
     - "9000:9000"

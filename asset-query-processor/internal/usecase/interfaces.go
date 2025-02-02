@@ -17,17 +17,17 @@ type (
 
 	// AssetQueryRepository defines the interface for querying wallet balances & transactions.
 	AssetQueryRepositoryHandler interface {
-		// Get the balance of a wallet.
-		GetBalance(ctx context.Context, walletID int) (float64, error)
+		// GetBalance retrieves the balance of a specific asset in a wallet
+		GetBalance(ctx context.Context, walletID int, assetName string) (float64, error)
 
-		// Update the balance of a wallet.
-		UpdateBalance(ctx context.Context, walletID int, newBalance float64) error
+		// UpdateBalance updates the balance of a specific asset in a wallet
+		UpdateBalance(ctx context.Context, walletID int, assetName string, amount float64) error
 
-		// Insert a transaction record into the database.
+		// InsertTransaction inserts a new transaction record into the database
 		InsertTransaction(ctx context.Context, txn entity.Transaction) error
 
-		// Get all transactions for a specific wallet.
-		GetTransactionHistory(ctx context.Context, walletID int) ([]entity.Transaction, error)
+		// GetTransactionHistory retrieves the transaction history for a wallet
+		GetTransactionHistory(ctx context.Context, walletID int, assetName string) ([]entity.Transaction, error)
 	}
 
 	/* Event Handler  UseCase Interface */

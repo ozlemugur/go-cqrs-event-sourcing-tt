@@ -17,5 +17,5 @@ postgres:
  
 
 kafka:
-  KAFKA_BROKER: '127.0.0.1:9092'
+  KAFKA_BROKER: 'localhost:9094'
   EVENT_TOPIC: 'event-journal'
