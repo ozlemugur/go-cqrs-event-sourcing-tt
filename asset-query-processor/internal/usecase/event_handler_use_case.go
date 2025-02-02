@@ -12,12 +12,14 @@ import (
 )
 
 type eventHandler struct {
-	repo AssetQueryRepositoryHandler
-	log  logger.Interface
+	repo  AssetQueryRepositoryHandler
+	log   logger.Interface
+	retry RetryEventProducer
+	dlq   DLQEventProducer
 }
 
-func NewEventHandler(r AssetQueryRepositoryHandler, l logger.Interface) EventHandler {
-	return &eventHandler{repo: r, log: l}
+func NewEventHandler(r AssetQueryRepositoryHandler, retry RetryEventProducer, dlq DLQEventProducer, l logger.Interface) EventHandler {
+	return &eventHandler{repo: r, log: l, retry: retry, dlq: dlq}
 }
 
 // EventTypeHandler defines the function signature for handling events
@@ -35,7 +37,6 @@ func (h *eventHandler) MsgfessageHandler(key, value []byte) error {
 
 	ctx := context.Background()
 
-	// Mesajın içeriğine bağlı olarak bir işlem yapın
 	if len(value) == 0 {
 		return fmt.Errorf("empty message value")
 	}
@@ -44,21 +45,47 @@ func (h *eventHandler) MsgfessageHandler(key, value []byte) error {
 	decodedValue, err := base64.StdEncoding.DecodeString(strings.Trim(string(value), "\""))
 	if err != nil {
 		h.log.Error(err, "Base64 decode error")
-		//return fmt.Errorf("base64 decode error: %w", err) //TODO: retry and deadletter queue ?
+		return h.retryOrSendToDLQ(ctx, key, value, "Base64 decode error")
 	}
 
 	// JSON mesajını çözme
 	var event entity.WalletEvent
 	if err := json.Unmarshal(decodedValue, &event); err != nil {
-		h.log.Error(err, "Failed to process event")
-		//return fmt.Errorf("json unmarshal error: %w", err) //TODO: retry and deadletter queue ?
+		h.log.Error(err, "JSON unmarshal error")
+		return h.retryOrSendToDLQ(ctx, key, decodedValue, "JSON unmarshal error")
 	}
 
+	// Event'i işleme
 	if err := h.ProcessEvent(ctx, event); err != nil {
 		h.log.Error(err, "Failed to process event")
+		return h.retryOrSendToDLQ(ctx, key, decodedValue, "Event processing error")
 	}
 
 	return nil
+}
+
+func (h *eventHandler) retryOrSendToDLQ(ctx context.Context, key, value []byte, errorMsg string) error {
+	const maxRetries = 3
+
+	// Retry deneme sayısını belirle (örnek olarak 0 başlatıldı)
+	retryCount := h.getRetryCount(key)
+
+	if retryCount < maxRetries {
+		h.log.Info("Retrying message", "key", string(key), "retryCount", retryCount)
+		h.incrementRetryCount(key)
+		return h.retry.PublishRetryEvent(ctx, value)
+	} else {
+		h.log.Info("Sending message to DLQ", "key", string(key))
+		return h.dlq.PublishDLQEvent(ctx, value)
+	}
+}
+
+func (h *eventHandler) getRetryCount(key []byte) int {
+	return 3
+}
+
+func (h *eventHandler) incrementRetryCount(key []byte) {
+	// Retry sayısını bir metadata olarak artır
 }
 
 // ProcessEvent dynamically handles wallet events using the map

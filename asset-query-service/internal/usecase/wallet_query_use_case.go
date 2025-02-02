@@ -8,55 +8,55 @@ import (
 	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/pkg/logger"
 )
 
-// WalletQueryUseCase - Implements business logic for wallet operations
+// WalletQueryUseCase implements business logic for wallet asset operations
 type WalletQueryUseCase struct {
 	repo WalletQueryRepositoryHandler
-	l    logger.Interface
+	log  logger.Interface
 }
 
-// NewWalletQueryUseCase - Creates a new instance of WalletQueryUseCase
-func NewWalletQueryUseCase(r WalletQueryRepositoryHandler, l logger.Interface) *WalletQueryUseCase {
-	return &WalletQueryUseCase{
-		repo: r,
-		l:    l,
-	}
+// NewWalletQueryUseCase creates a new instance of WalletQueryUseCase
+func NewWalletQueryUseCase(r WalletQueryRepositoryHandler, log logger.Interface) *WalletQueryUseCase {
+	return &WalletQueryUseCase{repo: r, log: log}
 }
 
-// GetAllWallets - Retrieves all wallets from the database
-func (uc *WalletQueryUseCase) GetAllWallets(ctx context.Context) ([]entity.Wallet, error) {
-	wallets, err := uc.repo.GetAllWallets(ctx)
+// GetAllAssets retrieves all assets for a given wallet ID
+func (uc *WalletQueryUseCase) GetAllAssets(ctx context.Context, walletID int) ([]entity.WalletAsset, error) {
+	assets, err := uc.repo.GetAssetsByWalletID(ctx, walletID)
 	if err != nil {
-		return nil, fmt.Errorf("WalletQueryUseCase - GetAllWallets - uc.repo.GetAllWallets: %w", err)
+		return nil, fmt.Errorf("WalletQueryUseCase - GetAllAssets - uc.repo.GetAssetsByWalletID: %w", err)
 	}
-	return wallets, nil
+	return assets, nil
 }
 
-// GetWalletByID - Retrieves a wallet by its ID
-func (uc *WalletQueryUseCase) GetWalletByID(ctx context.Context, id int) (*entity.Wallet, error) {
-	wallet, err := uc.repo.GetWalletByID(ctx, id)
+// GetAssetBalance retrieves the balance of a specific asset in a wallet
+func (uc *WalletQueryUseCase) GetAssetBalance(ctx context.Context, walletID int, assetName string) (*entity.WalletAsset, error) {
+	amount, err := uc.repo.GetWalletAsset(ctx, walletID, assetName)
 	if err != nil {
-		return nil, fmt.Errorf("WalletQueryUseCase - GetWalletByID - uc.repo.GetWalletByID: %w", err)
+		return nil, fmt.Errorf("WalletQueryUseCase - GetAssetBalance - uc.repo.GetWalletAsset: %w", err)
 	}
-	if wallet == nil {
-		return nil, fmt.Errorf("WalletQueryUseCase - GetWalletByID: wallet not found")
-	}
-	return wallet, nil
+	return &entity.WalletAsset{
+		WalletID:  walletID,
+		AssetName: assetName,
+		Amount:    amount,
+	}, nil
 }
 
-// GetBalance - Retrieves the current balance of a wallet by its ID
-func (uc *WalletQueryUseCase) GetBalance(ctx context.Context, walletID int) (float64, error) {
-	balance, err := uc.repo.GetBalance(ctx, walletID)
-	if err != nil {
-		return 0, fmt.Errorf("WalletQueryUseCase - GetBalance - uc.repo.GetBalance: %w", err)
-	}
-	return balance, nil
-}
-
-// GetTransactionHistory - Retrieves transaction history for a specific wallet
-func (uc *WalletQueryUseCase) GetTransactionHistory(ctx context.Context, walletID int) ([]entity.Transaction, error) {
+// GetTransactionHistory retrieves the transaction history for a given wallet and asset
+func (uc *WalletQueryUseCase) GetTransactionHistory(ctx context.Context, walletID int, assetName string) ([]entity.Transaction, error) {
 	transactions, err := uc.repo.GetTransactionHistory(ctx, walletID)
 	if err != nil {
 		return nil, fmt.Errorf("WalletQueryUseCase - GetTransactionHistory - uc.repo.GetTransactionHistory: %w", err)
 	}
-	return transactions, nil
+	return filterTransactionsByAsset(transactions, assetName), nil
+}
+
+// Helper function to filter transactions by asset name
+func filterTransactionsByAsset(transactions []entity.Transaction, assetName string) []entity.Transaction {
+	filtered := make([]entity.Transaction, 0)
+	for _, txn := range transactions {
+		if txn.AssetName == assetName {
+			filtered = append(filtered, txn)
+		}
+	}
+	return filtered
 }

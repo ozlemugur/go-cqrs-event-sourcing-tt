@@ -10,34 +10,6 @@
     "basePath": "/v1",
     "paths": {
         "/wallets": {
-            "get": {
-                "description": "Get a list of all wallets from the database",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "wallets"
-                ],
-                "summary": "Retrieve all wallets",
-                "operationId": "get-all-wallets",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/v1.walletResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/v1.response"
-                        }
-                    }
-                }
-            },
             "post": {
                 "description": "Add a new wallet to the database",
                 "consumes": [
@@ -112,64 +84,6 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/entity.Wallet"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/v1.response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/v1.response"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Update details of a specific wallet",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "wallets"
-                ],
-                "summary": "Update a wallet by ID",
-                "operationId": "update-wallet",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Wallet ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Updated wallet details",
-                        "name": "wallet",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/entity.Wallet"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/v1.response"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/v1.response"
                         }
                     },
                     "404": {
@@ -269,26 +183,6 @@
                 "error": {
                     "type": "string",
                     "example": "detail"
-                }
-            }
-        },
-        "v1.walletResponse": {
-            "type": "object",
-            "properties": {
-                "count": {
-                    "type": "integer"
-                },
-                "error": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "wallets": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entity.Wallet"
-                    }
                 }
             }
         }

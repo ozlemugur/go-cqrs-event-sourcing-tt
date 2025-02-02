@@ -15,9 +15,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/wallets/{id}": {
+        "/wallets/{id}/assets": {
             "get": {
-                "description": "Get details of a specific wallet by its ID",
+                "description": "Get all assets for a specific wallet by its ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -27,8 +27,8 @@ const docTemplate = `{
                 "tags": [
                     "wallets"
                 ],
-                "summary": "Retrieve a wallet by ID",
-                "operationId": "get-wallet-by-id",
+                "summary": "Retrieve all assets of a wallet",
+                "operationId": "get-all-assets",
                 "parameters": [
                     {
                         "type": "integer",
@@ -42,7 +42,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/v1.WalletResponse"
+                            "$ref": "#/definitions/v1.AssetResponse"
                         }
                     },
                     "404": {
@@ -60,9 +60,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/wallets/{id}/balance": {
+        "/wallets/{id}/assets/{asset}": {
             "get": {
-                "description": "Get the balance of a specific wallet",
+                "description": "Get the balance of a specific asset in a wallet",
                 "consumes": [
                     "application/json"
                 ],
@@ -72,13 +72,20 @@ const docTemplate = `{
                 "tags": [
                     "wallets"
                 ],
-                "summary": "Retrieve wallet balance",
-                "operationId": "get-wallet-balance",
+                "summary": "Retrieve balance of a specific asset",
+                "operationId": "get-asset-balance",
                 "parameters": [
                     {
                         "type": "integer",
                         "description": "Wallet ID",
                         "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Asset Name",
+                        "name": "asset",
                         "in": "path",
                         "required": true
                     }
@@ -87,7 +94,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/v1.BalanceResponse"
+                            "$ref": "#/definitions/v1.AssetBalanceResponse"
                         }
                     },
                     "404": {
@@ -118,7 +125,7 @@ const docTemplate = `{
                     "wallets"
                 ],
                 "summary": "Retrieve transaction history",
-                "operationId": "get-wallet-transaction-history",
+                "operationId": "get-transaction-history",
                 "parameters": [
                     {
                         "type": "integer",
@@ -159,6 +166,9 @@ const docTemplate = `{
                     "description": "Transaction amount",
                     "type": "number"
                 },
+                "asset_name": {
+                    "type": "string"
+                },
                 "created_at": {
                     "description": "Timestamp when the transaction occurred",
                     "type": "string"
@@ -181,24 +191,35 @@ const docTemplate = `{
                 }
             }
         },
-        "entity.Wallet": {
+        "entity.WalletAsset": {
             "type": "object",
             "properties": {
-                "address": {
-                    "description": "Wallet address",
+                "amount": {
+                    "description": "The amount of the asset",
+                    "type": "number"
+                },
+                "asset_name": {
+                    "description": "The name of the asset (e.g., BTC, ETH)",
                     "type": "string"
                 },
-                "network": {
-                    "description": "Wallet network",
+                "updated_at": {
+                    "description": "Timestamp of the last update",
                     "type": "string"
+                },
+                "wallet_id": {
+                    "description": "The ID of the wallet",
+                    "type": "integer"
                 }
             }
         },
-        "v1.BalanceResponse": {
+        "v1.AssetBalanceResponse": {
             "type": "object",
             "properties": {
-                "balance": {
+                "amount": {
                     "type": "number"
+                },
+                "asset_name": {
+                    "type": "string"
                 },
                 "error": {
                     "type": "string"
@@ -208,6 +229,23 @@ const docTemplate = `{
                 },
                 "wallet_id": {
                     "type": "integer"
+                }
+            }
+        },
+        "v1.AssetResponse": {
+            "type": "object",
+            "properties": {
+                "assets": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.WalletAsset"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
                 }
             }
         },
@@ -231,20 +269,6 @@ const docTemplate = `{
                 }
             }
         },
-        "v1.WalletResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "wallet": {
-                    "$ref": "#/definitions/entity.Wallet"
-                }
-            }
-        },
         "v1.response": {
             "type": "object",
             "properties": {
@@ -260,11 +284,11 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "localhost:8083",
 	BasePath:         "/v1",
 	Schemes:          []string{},
-	Title:            "Wallet Management Service",
-	Description:      "Wallet Management",
+	Title:            "Asset Query Service",
+	Description:      "Asset Query Service",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

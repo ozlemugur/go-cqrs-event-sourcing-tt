@@ -26,19 +26,6 @@ definitions:
         example: detail
         type: string
     type: object
-  v1.walletResponse:
-    properties:
-      count:
-        type: integer
-      error:
-        type: string
-      status:
-        type: string
-      wallets:
-        items:
-          $ref: '#/definitions/entity.Wallet'
-        type: array
-    type: object
 host: localhost:8081
 info:
   contact: {}
@@ -47,25 +34,6 @@ info:
   version: "1.0"
 paths:
   /wallets:
-    get:
-      consumes:
-      - application/json
-      description: Get a list of all wallets from the database
-      operationId: get-all-wallets
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/v1.walletResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/v1.response'
-      summary: Retrieve all wallets
-      tags:
-      - wallets
     post:
       consumes:
       - application/json
@@ -153,45 +121,6 @@ paths:
           schema:
             $ref: '#/definitions/v1.response'
       summary: Retrieve a wallet by ID
-      tags:
-      - wallets
-    put:
-      consumes:
-      - application/json
-      description: Update details of a specific wallet
-      operationId: update-wallet
-      parameters:
-      - description: Wallet ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Updated wallet details
-        in: body
-        name: wallet
-        required: true
-        schema:
-          $ref: '#/definitions/entity.Wallet'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/v1.response'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/v1.response'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/v1.response'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/v1.response'
-      summary: Update a wallet by ID
       tags:
       - wallets
 swagger: "2.0"

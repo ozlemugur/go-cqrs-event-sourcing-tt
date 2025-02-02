@@ -19,12 +19,12 @@ import (
 
 // NewRouter -.
 // Swagger spec:
-// @title       Wallet Management Service
-// @description Wallet Management
+// @title       Asset Query Service
+// @description Asset Query Service
 // @version     1.0
 // @host        localhost:8083
 // @BasePath    /v1
-func NewRouter(handler *gin.Engine, l logger.Interface, t usecase.WalletQueryHandler) {
+func NewRouter(handler *gin.Engine, l logger.Interface, t usecase.WalletQueryUseCaseHandler) {
 	// Options
 	handler.Use(gin.Logger())
 	handler.Use(gin.Recovery())

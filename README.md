@@ -2,7 +2,9 @@
 
 # go cqrs event sourcing / clean architecture based (tahassurtalih)
 
+asset-query-processor  kafka göçtüğünden kapanıyor, handle mı etsek anacım
 
+retry mechanism için ayrı efor gerekecek, ayrıca konuşalıms.
 
 kafdrop is serve here:  http://localhost:9000/
 

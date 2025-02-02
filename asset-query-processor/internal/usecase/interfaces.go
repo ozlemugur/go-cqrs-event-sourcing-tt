@@ -35,4 +35,12 @@ type (
 		ProcessEvent(ctx context.Context, event entity.WalletEvent) error
 		MsgfessageHandler(key, value []byte) error
 	}
+
+	RetryEventProducer interface {
+		PublishRetryEvent(ctx context.Context, event []byte) error
+	}
+
+	DLQEventProducer interface {
+		PublishDLQEvent(ctx context.Context, event []byte) error
+	}
 )

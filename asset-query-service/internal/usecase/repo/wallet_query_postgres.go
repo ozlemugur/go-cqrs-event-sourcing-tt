@@ -12,107 +12,125 @@ type WalletQueryRepo struct {
 	*postgres.Postgres
 }
 
-// NewWalletRepo creates a new instance of WalletRepo
+// NewWalletQueryRepo creates a new instance of WalletQueryRepo
 func NewWalletQueryRepo(pg *postgres.Postgres) *WalletQueryRepo {
 	return &WalletQueryRepo{pg}
 }
 
-// GetAllWallets retrieves all wallets from the database
-func (r *WalletQueryRepo) GetAllWallets(ctx context.Context) ([]entity.Wallet, error) {
+// GetAssetsByWalletID retrieves all assets and their amounts for a specific wallet ID
+func (r *WalletQueryRepo) GetAssetsByWalletID(ctx context.Context, walletID int) ([]entity.WalletAsset, error) {
 	sql, _, err := r.Builder.
-		Select("id, address, network, created_at").
-		From("wallets").
-		ToSql()
-	if err != nil {
-		return nil, fmt.Errorf("WalletRepo - GetAllWallets - r.Builder: %w", err)
-	}
-
-	rows, err := r.Pool.Query(ctx, sql)
-	if err != nil {
-		return nil, fmt.Errorf("WalletRepo - GetAllWallets - r.Pool.Query: %w", err)
-	}
-	defer rows.Close()
-
-	wallets := make([]entity.Wallet, 0)
-	for rows.Next() {
-		wallet := entity.Wallet{}
-		err = rows.Scan(&wallet.ID, &wallet.Address, &wallet.Network, &wallet.CreatedAt)
-		if err != nil {
-			return nil, fmt.Errorf("WalletRepo - GetAllWallets - rows.Scan: %w", err)
-		}
-		wallets = append(wallets, wallet)
-	}
-
-	return wallets, nil
-}
-
-// GetWalletByID retrieves a wallet by its ID
-func (r *WalletQueryRepo) GetWalletByID(ctx context.Context, id int) (*entity.Wallet, error) {
-	sql, _, err := r.Builder.
-		Select("id, address, network, created_at").
-		From("wallets").
-		Where("id = ?", id).
-		ToSql()
-	if err != nil {
-		return nil, fmt.Errorf("WalletRepo - GetWalletByID - r.Builder: %w", err)
-	}
-
-	row := r.Pool.QueryRow(ctx, sql, id)
-
-	wallet := &entity.Wallet{}
-	err = row.Scan(&wallet.ID, &wallet.Address, &wallet.Network, &wallet.CreatedAt)
-	if err != nil {
-		return nil, fmt.Errorf("WalletRepo - GetWalletByID - row.Scan: %w", err)
-	}
-
-	return wallet, nil
-}
-
-// GetBalance retrieves the balance of a wallet from the read model
-func (r *WalletQueryRepo) GetBalance(ctx context.Context, walletID int) (float64, error) {
-	var balance float64
-
-	sql, _, err := r.Builder.
-		Select("balance").
-		From("wallet_balances").
+		Select("asset_name, amount").
+		From("wallet_assets").
 		Where("wallet_id = ?", walletID).
 		ToSql()
 	if err != nil {
-		return 0, fmt.Errorf("WalletRepo - GetBalance - Builder: %w", err)
+		return nil, fmt.Errorf("WalletQueryRepo - GetAssetsByWalletID - Builder: %w", err)
 	}
 
-	err = r.Pool.QueryRow(ctx, sql, walletID).Scan(&balance)
+	rows, err := r.Pool.Query(ctx, sql, walletID)
 	if err != nil {
-		return 0, fmt.Errorf("WalletRepo - GetBalance - QueryRow: %w", err)
+		return nil, fmt.Errorf("WalletQueryRepo - GetAssetsByWalletID - Query: %w", err)
+	}
+	defer rows.Close()
+
+	assets := make([]entity.WalletAsset, 0)
+	for rows.Next() {
+		var asset entity.WalletAsset
+		err = rows.Scan(&asset.AssetName, &asset.Amount)
+		if err != nil {
+			return nil, fmt.Errorf("WalletQueryRepo - GetAssetsByWalletID - Scan: %w", err)
+		}
+		assets = append(assets, asset)
 	}
 
-	return balance, nil
+	return assets, nil
+}
+
+// GetWalletAsset retrieves the amount of a specific asset for a wallet
+func (r *WalletQueryRepo) GetWalletAsset(ctx context.Context, walletID int, assetName string) (float64, error) {
+	var amount float64
+
+	sql, _, err := r.Builder.
+		Select("amount").
+		From("wallet_assets").
+		Where("wallet_id = ? AND asset_name = ?", walletID, assetName).
+		ToSql()
+	if err != nil {
+		return 0, fmt.Errorf("WalletQueryRepo - GetWalletAsset - Builder: %w", err)
+	}
+
+	err = r.Pool.QueryRow(ctx, sql, walletID, assetName).Scan(&amount)
+	if err != nil {
+		return 0, fmt.Errorf("WalletQueryRepo - GetWalletAsset - QueryRow: %w", err)
+	}
+
+	return amount, nil
+}
+
+// UpdateWalletAsset updates the amount of a specific asset for a wallet
+func (r *WalletQueryRepo) UpdateWalletAsset(ctx context.Context, walletID int, assetName string, amount float64) error {
+	sql, _, err := r.Builder.
+		Update("wallet_assets").
+		Set("amount", amount).
+		Where("wallet_id = ? AND asset_name = ?", walletID, assetName).
+		ToSql()
+	if err != nil {
+		return fmt.Errorf("WalletQueryRepo - UpdateWalletAsset - Builder: %w", err)
+	}
+
+	_, err = r.Pool.Exec(ctx, sql, walletID, assetName)
+	if err != nil {
+		return fmt.Errorf("WalletQueryRepo - UpdateWalletAsset - Exec: %w", err)
+	}
+
+	return nil
+}
+
+// InsertOrUpdateWalletAsset inserts or updates a wallet asset entry
+func (r *WalletQueryRepo) InsertOrUpdateWalletAsset(ctx context.Context, walletID int, assetName string, amount float64) error {
+	sql, _, err := r.Builder.
+		Insert("wallet_assets").
+		Columns("wallet_id", "asset_name", "amount").
+		Values(walletID, assetName, amount).
+		Suffix("ON CONFLICT (wallet_id, asset_name) DO UPDATE SET amount = EXCLUDED.amount").
+		ToSql()
+	if err != nil {
+		return fmt.Errorf("WalletQueryRepo - InsertOrUpdateWalletAsset - Builder: %w", err)
+	}
+
+	_, err = r.Pool.Exec(ctx, sql, walletID, assetName, amount)
+	if err != nil {
+		return fmt.Errorf("WalletQueryRepo - InsertOrUpdateWalletAsset - Exec: %w", err)
+	}
+
+	return nil
 }
 
 // GetTransactionHistory retrieves transaction history for a wallet
 func (r *WalletQueryRepo) GetTransactionHistory(ctx context.Context, walletID int) ([]entity.Transaction, error) {
 	sql, _, err := r.Builder.
-		Select("transaction_id, wallet_id, type, amount, created_at").
+		Select("transaction_id, wallet_id, asset_name, type, amount, created_at").
 		From("wallet_transactions").
 		Where("wallet_id = ?", walletID).
 		OrderBy("created_at DESC").
 		ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("WalletRepo - GetTransactionHistory - Builder: %w", err)
+		return nil, fmt.Errorf("WalletQueryRepo - GetTransactionHistory - Builder: %w", err)
 	}
 
 	rows, err := r.Pool.Query(ctx, sql, walletID)
 	if err != nil {
-		return nil, fmt.Errorf("WalletRepo - GetTransactionHistory - Query: %w", err)
+		return nil, fmt.Errorf("WalletQueryRepo - GetTransactionHistory - Query: %w", err)
 	}
 	defer rows.Close()
 
 	transactions := make([]entity.Transaction, 0)
 	for rows.Next() {
 		var txn entity.Transaction
-		err = rows.Scan(&txn.ID, &txn.WalletID, &txn.Type, &txn.Amount, &txn.CreatedAt)
+		err = rows.Scan(&txn.ID, &txn.WalletID, &txn.AssetName, &txn.Type, &txn.Amount, &txn.CreatedAt)
 		if err != nil {
-			return nil, fmt.Errorf("WalletRepo - GetTransactionHistory - Scan: %w", err)
+			return nil, fmt.Errorf("WalletQueryRepo - GetTransactionHistory - Scan: %w", err)
 		}
 		transactions = append(transactions, txn)
 	}

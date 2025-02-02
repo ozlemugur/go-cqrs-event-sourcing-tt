@@ -13,6 +13,7 @@ import (
 	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/asset-query-processor/internal/usecase"
 	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/asset-query-processor/internal/usecase/repo"
 	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/pkg/kafka/consumer"
+	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/pkg/kafka/producer"
 	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/pkg/logger"
 	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/pkg/postgres"
 )
@@ -30,25 +31,55 @@ func Run(cfg *config.Config) {
 
 	l.Error("postgresql ayakta.")
 
-	// Initialize use case (business logic handler)
-	queryRepo := repo.NewAssetQueryRepo(pg)
-	eventHandler := usecase.NewEventHandler(queryRepo, l)
-
 	// Kafka setup
 
 	kafkaBroker := cfg.Kafka.KAFKA_BROKER // os.Getenv("KAFKA_BROKER")      // e.g., "kafka:9092"
 	l.Error("KAFKA_BROKER")
 	l.Error(kafkaBroker)
 	eventTopic := cfg.Kafka.EVENT_TOPIC // e.g., "event-journal"
+
 	l.Error("EVENT_TOPIC")
 	l.Error(eventTopic)
 	kafkaGroupID := "asset-query-processor-group" // Consumer group ID
+
+	retryTopic := cfg.Kafka.RETRY_TOPIC
+	l.Error("RETRY_TOPIC")
+	l.Error(retryTopic)
+
+	dlqTopic := cfg.Kafka.DLQ_TOPIC
+	l.Error("DLQ_TOPIC")
+	l.Error(dlqTopic)
+
+	// Initialize RETRY Kafka Producer
+	kafkaRetryProducer, err := producer.NewKafkaProducer(kafkaBroker)
+	if err != nil {
+		l.Fatal(" Failed to initialize Kafka producer: %v", err)
+	}
+	defer kafkaRetryProducer.Close()
+
+	retryProducer := controller.NewKafkaRetryEventProducer(kafkaRetryProducer, retryTopic)
+
+	// Initialize DLQ Kafka Producer
+	kafkaDlqProducer, err := producer.NewKafkaProducer(kafkaBroker)
+	if err != nil {
+		l.Fatal(" Failed to initialize Kafka producer: %v", err)
+	}
+	defer kafkaDlqProducer.Close()
+
+	dlqProducer := controller.NewDLQEventProducer(kafkaDlqProducer, dlqTopic)
+
+	/**********************************************************************************/
 
 	// Initialize Kafka consumer
 	consumer, err := consumer.NewKafkaConsumer(kafkaBroker, kafkaGroupID, eventTopic)
 	if err != nil {
 		log.Fatal("Failed to initialize Kafka consumer", "error", err)
+
 	}
+
+	// Initialize use case (business logic handler)
+	queryRepo := repo.NewAssetQueryRepo(pg)
+	eventHandler := usecase.NewEventHandler(queryRepo, retryProducer, dlqProducer, l)
 
 	eventConsumer := controller.NewEventConsumer(consumer, eventHandler, l)
 	if err != nil {

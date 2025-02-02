@@ -19,3 +19,5 @@ postgres:
 kafka:
   KAFKA_BROKER: 'localhost:9094'
   EVENT_TOPIC: 'event-journal'
+  RETRY_TOPIC : 'query-processor-retry'
+  DLQ_TOPIC : 'query-procesor-dlq'

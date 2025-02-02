@@ -20,54 +20,11 @@ func newWalletRoutes(handler *gin.RouterGroup, t usecase.WalletHandler, l logger
 
 	h := handler.Group("/wallets")
 	{
-		h.GET("", r.GetAllWallets)       // Retrieve all wallets
+
 		h.GET("/:id", r.GetWalletByID)   // Retrieve a wallet by ID
 		h.POST("", r.CreateWallet)       // Create a new wallet
-		h.PUT("/:id", r.UpdateWallet)    // Update a wallet by ID
 		h.DELETE("/:id", r.DeleteWallet) // Delete a wallet by ID
 	}
-}
-
-type walletResponse struct {
-	Wallets []entity.Wallet `json:"wallets"`
-	Count   int             `json:"count"`
-	Status  string          `json:"status"`
-	Error   string          `json:"error,omitempty"`
-}
-
-type assetResponse struct {
-	WalletID int            `json:"wallet_id"`
-	Assets   []entity.Asset `json:"assets"`
-	Status   string         `json:"status"`
-	Error    string         `json:"error,omitempty"`
-}
-
-// @Summary     Retrieve all wallets
-// @Description Get a list of all wallets from the database
-// @ID          get-all-wallets
-// @Tags        wallets
-// @Accept      json
-// @Produce     json
-// @Success     200 {object} walletResponse
-// @Failure     500 {object} response
-// @Router      /wallets [get]
-func (r *walletRoutes) GetAllWallets(c *gin.Context) {
-	wallets, err := r.t.GetAllWallets(c.Request.Context())
-	if err != nil {
-		r.l.Error(err, "http - v1 - GetAllWallets")
-		errorResponse(c, http.StatusInternalServerError, "Failed to retrieve wallets")
-		return
-	}
-	response := walletResponse{
-		Wallets: wallets,
-		Count:   len(wallets),
-		Status:  "success",
-	}
-	if len(wallets) == 0 {
-		response.Status = "empty"
-		response.Wallets = []entity.Wallet{}
-	}
-	c.JSON(http.StatusOK, response)
 }
 
 // @Summary     Retrieve a wallet by ID
@@ -127,42 +84,6 @@ func (r *walletRoutes) CreateWallet(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusCreated, gin.H{"status": "success"})
-}
-
-// @Summary     Update a wallet by ID
-// @Description Update details of a specific wallet
-// @ID          update-wallet
-// @Tags        wallets
-// @Accept      json
-// @Produce     json
-// @Param       id path int true "Wallet ID"
-// @Param       wallet body entity.Wallet true "Updated wallet details"
-// @Success     200 {object} response
-// @Failure     400 {object} response
-// @Failure     404 {object} response
-// @Failure     500 {object} response
-// @Router      /wallets/{id} [put]
-func (r *walletRoutes) UpdateWallet(c *gin.Context) {
-	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
-	if err != nil {
-		r.l.Error(err, "http - v1 - UpdateWallet - invalid ID format")
-		errorResponse(c, http.StatusBadRequest, "Invalid wallet ID")
-		return
-	}
-
-	var wallet entity.Wallet
-	if err := c.ShouldBindJSON(&wallet); err != nil {
-		r.l.Error(err, "http - v1 - UpdateWallet - invalid input")
-		errorResponse(c, http.StatusBadRequest, "Invalid input")
-		return
-	}
-	if err := r.t.UpdateWallet(c.Request.Context(), id, wallet); err != nil {
-		r.l.Error(err, "http - v1 - UpdateWallet - use case error")
-		errorResponse(c, http.StatusInternalServerError, "Failed to update wallet")
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"status": "success"})
 }
 
 // @Summary     Delete a wallet by ID

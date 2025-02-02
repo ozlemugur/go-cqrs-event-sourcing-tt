@@ -7,7 +7,7 @@ toolchain go1.23.4
 require (
 	github.com/golang-migrate/migrate/v4 v4.18.2
 	github.com/ilyakaznacheev/cleanenv v1.5.0
-	github.com/ozlemugur/go-cqrs-event-sourcing-tt v0.0.0-20250129194152-8eaf2ebf06c2
+	github.com/ozlemugur/go-cqrs-event-sourcing-tt v0.0.0-20250202135520-539b71560761
 	github.com/swaggo/swag v1.16.4
 )
 
@@ -40,7 +40,7 @@ require (
 	github.com/lib/pq v1.10.9 // indirect
 	github.com/mailru/easyjson v0.7.6 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.19 // indirect
+	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/rs/zerolog v1.33.0 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	golang.org/x/crypto v0.31.0 // indirect

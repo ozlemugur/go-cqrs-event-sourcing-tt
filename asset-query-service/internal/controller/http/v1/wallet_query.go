@@ -11,34 +11,35 @@ import (
 )
 
 type walletQueryRoutes struct {
-	t usecase.WalletQueryHandler
+	t usecase.WalletQueryUseCaseHandler
 	l logger.Interface
 }
 
-func newWalletQueryRoutes(handler *gin.RouterGroup, t usecase.WalletQueryHandler, l logger.Interface) {
+func newWalletQueryRoutes(handler *gin.RouterGroup, t usecase.WalletQueryUseCaseHandler, l logger.Interface) {
 	r := &walletQueryRoutes{t, l}
 
 	h := handler.Group("/wallets")
 	{
-		h.GET("/:id", r.GetWalletByID)
-		h.GET("/:id/balance", r.GetWalletBalance)           // Retrieve wallet balance
+		h.GET("/:id/assets", r.GetAllAssets)                // Retrieve all assets of a wallet
+		h.GET("/:id/assets/:asset", r.GetAssetBalance)      // Retrieve balance of a specific asset
 		h.GET("/:id/transactions", r.GetTransactionHistory) // Retrieve transaction history
 	}
 }
 
-// Swagger nesnelerindeki isimleri büyük harfle başladık
+// **Response Structs**
 
-type WalletResponse struct {
-	Wallet entity.Wallet `json:"wallet"`
-	Status string        `json:"status"`
-	Error  string        `json:"error,omitempty"`
+type AssetResponse struct {
+	Assets []entity.WalletAsset `json:"assets"`
+	Status string               `json:"status"`
+	Error  string               `json:"error,omitempty"`
 }
 
-type BalanceResponse struct {
-	WalletID int     `json:"wallet_id"`
-	Balance  float64 `json:"balance"`
-	Status   string  `json:"status"`
-	Error    string  `json:"error,omitempty"`
+type AssetBalanceResponse struct {
+	WalletID  int     `json:"wallet_id"`
+	AssetName string  `json:"asset_name"`
+	Amount    float64 `json:"amount"`
+	Status    string  `json:"status"`
+	Error     string  `json:"error,omitempty"`
 }
 
 type TransactionHistoryResponse struct {
@@ -48,68 +49,72 @@ type TransactionHistoryResponse struct {
 	Error        string               `json:"error,omitempty"`
 }
 
-// @Summary     Retrieve a wallet by ID
-// @Description Get details of a specific wallet by its ID
-// @ID          get-wallet-by-id
+// **Route Handlers**
+
+// @Summary     Retrieve all assets of a wallet
+// @Description Get all assets for a specific wallet by its ID
+// @ID          get-all-assets
 // @Tags        wallets
 // @Accept      json
 // @Produce     json
 // @Param       id path int true "Wallet ID"
-// @Success     200 {object} WalletResponse
+// @Success     200 {object} AssetResponse
 // @Failure     404 {object} response
 // @Failure     500 {object} response
-// @Router      /wallets/{id} [get]
-func (r *walletQueryRoutes) GetWalletByID(c *gin.Context) {
+// @Router      /wallets/{id}/assets [get]
+func (r *walletQueryRoutes) GetAllAssets(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		r.handleError(c, http.StatusBadRequest, "Invalid wallet ID")
 		return
 	}
 
-	wallet, err := r.t.GetWalletByID(c.Request.Context(), id)
+	assets, err := r.t.GetAllAssets(c.Request.Context(), id)
 	if err != nil {
-		r.handleError(c, http.StatusInternalServerError, "Failed to retrieve wallet")
+		r.handleError(c, http.StatusInternalServerError, "Failed to retrieve assets")
 		return
 	}
 
-	if wallet == nil {
-		r.handleError(c, http.StatusNotFound, "Wallet not found")
-		return
-	}
-
-	c.JSON(http.StatusOK, WalletResponse{Wallet: *wallet, Status: "success"})
+	c.JSON(http.StatusOK, AssetResponse{Assets: assets, Status: "success"})
 }
 
-// @Summary     Retrieve wallet balance
-// @Description Get the balance of a specific wallet
-// @ID          get-wallet-balance
+// @Summary     Retrieve balance of a specific asset
+// @Description Get the balance of a specific asset in a wallet
+// @ID          get-asset-balance
 // @Tags        wallets
 // @Accept      json
 // @Produce     json
 // @Param       id path int true "Wallet ID"
-// @Success     200 {object} BalanceResponse
+// @Param       asset path string true "Asset Name"
+// @Success     200 {object} AssetBalanceResponse
 // @Failure     404 {object} response
 // @Failure     500 {object} response
-// @Router      /wallets/{id}/balance [get]
-func (r *walletQueryRoutes) GetWalletBalance(c *gin.Context) {
+// @Router      /wallets/{id}/assets/{asset} [get]
+func (r *walletQueryRoutes) GetAssetBalance(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		r.handleError(c, http.StatusBadRequest, "Invalid wallet ID")
 		return
 	}
 
-	balance, err := r.t.GetBalance(c.Request.Context(), id)
+	assetName := c.Param("asset")
+	asset, err := r.t.GetAssetBalance(c.Request.Context(), id, assetName)
 	if err != nil {
-		r.handleError(c, http.StatusInternalServerError, "Failed to retrieve balance")
+		r.handleError(c, http.StatusInternalServerError, "Failed to retrieve asset balance")
 		return
 	}
 
-	c.JSON(http.StatusOK, BalanceResponse{WalletID: id, Balance: balance, Status: "success"})
+	c.JSON(http.StatusOK, AssetBalanceResponse{
+		WalletID:  id,
+		AssetName: asset.AssetName,
+		Amount:    asset.Amount,
+		Status:    "success",
+	})
 }
 
 // @Summary     Retrieve transaction history
 // @Description Get the transaction history for a wallet
-// @ID          get-wallet-transaction-history
+// @ID          get-transaction-history
 // @Tags        wallets
 // @Accept      json
 // @Produce     json
@@ -125,7 +130,7 @@ func (r *walletQueryRoutes) GetTransactionHistory(c *gin.Context) {
 		return
 	}
 
-	transactions, err := r.t.GetTransactionHistory(c.Request.Context(), id)
+	transactions, err := r.t.GetTransactionHistory(c.Request.Context(), id, "")
 	if err != nil {
 		r.handleError(c, http.StatusInternalServerError, "Failed to retrieve transaction history")
 		return
@@ -138,7 +143,7 @@ func (r *walletQueryRoutes) GetTransactionHistory(c *gin.Context) {
 	})
 }
 
-// handleError - Hataları daha iyi yönetmek için bir yardımcı fonksiyon
+// **Helper Function for Error Handling**
 func (r *walletQueryRoutes) handleError(c *gin.Context, statusCode int, message string) {
 	c.JSON(statusCode, gin.H{"status": "error", "message": message})
 }

@@ -5,6 +5,8 @@ definitions:
       amount:
         description: Transaction amount
         type: number
+      asset_name:
+        type: string
       created_at:
         description: Timestamp when the transaction occurred
         type: string
@@ -21,25 +23,44 @@ definitions:
         description: Wallet associated with the transaction
         type: integer
     type: object
-  entity.Wallet:
+  entity.WalletAsset:
     properties:
-      address:
-        description: Wallet address
-        type: string
-      network:
-        description: Wallet network
-        type: string
-    type: object
-  v1.BalanceResponse:
-    properties:
-      balance:
+      amount:
+        description: The amount of the asset
         type: number
+      asset_name:
+        description: The name of the asset (e.g., BTC, ETH)
+        type: string
+      updated_at:
+        description: Timestamp of the last update
+        type: string
+      wallet_id:
+        description: The ID of the wallet
+        type: integer
+    type: object
+  v1.AssetBalanceResponse:
+    properties:
+      amount:
+        type: number
+      asset_name:
+        type: string
       error:
         type: string
       status:
         type: string
       wallet_id:
         type: integer
+    type: object
+  v1.AssetResponse:
+    properties:
+      assets:
+        items:
+          $ref: '#/definitions/entity.WalletAsset'
+        type: array
+      error:
+        type: string
+      status:
+        type: string
     type: object
   v1.TransactionHistoryResponse:
     properties:
@@ -54,34 +75,25 @@ definitions:
           $ref: '#/definitions/entity.Transaction'
         type: array
     type: object
-  v1.WalletResponse:
-    properties:
-      error:
-        type: string
-      status:
-        type: string
-      wallet:
-        $ref: '#/definitions/entity.Wallet'
-    type: object
   v1.response:
     properties:
       error:
         example: detail
         type: string
     type: object
-host: localhost:8080
+host: localhost:8083
 info:
   contact: {}
-  description: Wallet Management
-  title: Wallet Management Service
+  description: Asset Query Service
+  title: Asset Query Service
   version: "1.0"
 paths:
-  /wallets/{id}:
+  /wallets/{id}/assets:
     get:
       consumes:
       - application/json
-      description: Get details of a specific wallet by its ID
-      operationId: get-wallet-by-id
+      description: Get all assets for a specific wallet by its ID
+      operationId: get-all-assets
       parameters:
       - description: Wallet ID
         in: path
@@ -94,7 +106,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/v1.WalletResponse'
+            $ref: '#/definitions/v1.AssetResponse'
         "404":
           description: Not Found
           schema:
@@ -103,28 +115,33 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/v1.response'
-      summary: Retrieve a wallet by ID
+      summary: Retrieve all assets of a wallet
       tags:
       - wallets
-  /wallets/{id}/balance:
+  /wallets/{id}/assets/{asset}:
     get:
       consumes:
       - application/json
-      description: Get the balance of a specific wallet
-      operationId: get-wallet-balance
+      description: Get the balance of a specific asset in a wallet
+      operationId: get-asset-balance
       parameters:
       - description: Wallet ID
         in: path
         name: id
         required: true
         type: integer
+      - description: Asset Name
+        in: path
+        name: asset
+        required: true
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/v1.BalanceResponse'
+            $ref: '#/definitions/v1.AssetBalanceResponse'
         "404":
           description: Not Found
           schema:
@@ -133,7 +150,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/v1.response'
-      summary: Retrieve wallet balance
+      summary: Retrieve balance of a specific asset
       tags:
       - wallets
   /wallets/{id}/transactions:
@@ -141,7 +158,7 @@ paths:
       consumes:
       - application/json
       description: Get the transaction history for a wallet
-      operationId: get-wallet-transaction-history
+      operationId: get-transaction-history
       parameters:
       - description: Wallet ID
         in: path

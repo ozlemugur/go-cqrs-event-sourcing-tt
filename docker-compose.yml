@@ -128,6 +128,8 @@ services:
     environment:
       KAFKA_BROKER: kafka:9092
       EVENT_TOPIC: event-journal
+      RETRY_TOPIC : 'query-processor-retry'
+      DLQ_TOPIC : 'query-procesor-dlq'
       QUERY_DB_HOST: query-db
       QUERY_DB_PORT: 5432
       QUERY_DB_USER: query_user

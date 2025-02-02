@@ -63,7 +63,7 @@ func (r *WalletRepo) GetAllWallets(ctx context.Context) ([]entity.Wallet, error)
 
 // GetWalletByID retrieves a wallet by its ID along with its assets
 func (r *WalletRepo) GetWalletByID(ctx context.Context, id int) (*entity.Wallet, error) {
-	sql, _, err := r.Builder.
+	sql, args, err := r.Builder.
 		Select("w.id, w.address, w.network, w.created_at, a.asset_name, a.amount").
 		From("wallets AS w").
 		LeftJoin("wallet_assets AS a ON w.id = a.wallet_id").
@@ -73,7 +73,7 @@ func (r *WalletRepo) GetWalletByID(ctx context.Context, id int) (*entity.Wallet,
 		return nil, fmt.Errorf("WalletRepo - GetWalletByID - Builder: %w", err)
 	}
 
-	rows, err := r.Pool.Query(ctx, sql)
+	rows, err := r.Pool.Query(ctx, sql, args)
 	if err != nil {
 		return nil, fmt.Errorf("WalletRepo - GetWalletByID - Query: %w", err)
 	}

@@ -8,22 +8,35 @@ import (
 )
 
 type (
-	/* Wallet Query UseCase Interface */
-	WalletQueryHandler interface {
-		GetAllWallets(ctx context.Context) ([]entity.Wallet, error)
-		GetWalletByID(ctx context.Context, id int) (*entity.Wallet, error)
-		// Balance & Transactions
-		GetBalance(ctx context.Context, walletID int) (float64, error)
-		GetTransactionHistory(ctx context.Context, walletID int) ([]entity.Transaction, error)
+
+	// WalletQueryHandler defines methods for querying wallet and asset data
+	// WalletQueryUseCaseHandler defines the interface for wallet asset operations
+	WalletQueryUseCaseHandler interface {
+		// Retrieves all assets and their balances for a specific wallet ID
+		GetAllAssets(ctx context.Context, walletID int) ([]entity.WalletAsset, error)
+
+		// Retrieves the balance of a specific asset in a wallet
+		GetAssetBalance(ctx context.Context, walletID int, assetName string) (*entity.WalletAsset, error)
+
+		// Retrieves the transaction history for a specific wallet and asset
+		GetTransactionHistory(ctx context.Context, walletID int, assetName string) ([]entity.Transaction, error)
 	}
 
-	// WalletRepository defines the methods for wallet operations
+	// WalletQueryRepositoryHandler defines the methods for querying wallet data.
 	WalletQueryRepositoryHandler interface {
-		// Wallet CRUD operations
-		GetAllWallets(ctx context.Context) ([]entity.Wallet, error)
-		GetWalletByID(ctx context.Context, id int) (*entity.Wallet, error)
-		// Balance & Transactions
-		GetBalance(ctx context.Context, walletID int) (float64, error)
+		// GetAssetsByWalletID retrieves all assets and their amounts for a specific wallet ID.
+		GetAssetsByWalletID(ctx context.Context, walletID int) ([]entity.WalletAsset, error)
+
+		// GetWalletAsset retrieves the amount of a specific asset for a wallet.
+		GetWalletAsset(ctx context.Context, walletID int, assetName string) (float64, error)
+
+		// UpdateWalletAsset updates the amount of a specific asset for a wallet.
+		UpdateWalletAsset(ctx context.Context, walletID int, assetName string, amount float64) error
+
+		// InsertOrUpdateWalletAsset inserts or updates a wallet asset entry.
+		InsertOrUpdateWalletAsset(ctx context.Context, walletID int, assetName string, amount float64) error
+
+		// GetTransactionHistory retrieves transaction history for a wallet.
 		GetTransactionHistory(ctx context.Context, walletID int) ([]entity.Transaction, error)
 	}
 )

@@ -105,12 +105,13 @@ github.com/mailru/easyjson/jwriter
 # github.com/mattn/go-colorable v0.1.13
 ## explicit; go 1.15
 github.com/mattn/go-colorable
-# github.com/mattn/go-isatty v0.0.19
+# github.com/mattn/go-isatty v0.0.20
 ## explicit; go 1.15
 github.com/mattn/go-isatty
-# github.com/ozlemugur/go-cqrs-event-sourcing-tt v0.0.0-20250129194152-8eaf2ebf06c2
-## explicit
+# github.com/ozlemugur/go-cqrs-event-sourcing-tt v0.0.0-20250202135520-539b71560761
+## explicit; go 1.22
 github.com/ozlemugur/go-cqrs-event-sourcing-tt/pkg/kafka/consumer
+github.com/ozlemugur/go-cqrs-event-sourcing-tt/pkg/kafka/producer
 github.com/ozlemugur/go-cqrs-event-sourcing-tt/pkg/logger
 github.com/ozlemugur/go-cqrs-event-sourcing-tt/pkg/postgres
 # github.com/rs/zerolog v1.33.0

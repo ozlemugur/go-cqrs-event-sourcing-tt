@@ -42,6 +42,8 @@ type (
 	Kafka struct {
 		KAFKA_BROKER string `env-required:"true"  yaml:"KAFKA_BROKER"  env:"KAFKA_BROKER"`
 		EVENT_TOPIC  string `env-required:"true"  yaml:"EVENT_TOPIC"  env:"EVENT_TOPIC"`
+		RETRY_TOPIC  string `env-required:"true"  yaml:"RETRY_TOPIC"  env:"RETRY_TOPIC"`
+		DLQ_TOPIC    string `env-required:"true"  yaml:"DLQ_TOPIC"  env:"DLQ_TOPIC"`
 	}
 )
 
