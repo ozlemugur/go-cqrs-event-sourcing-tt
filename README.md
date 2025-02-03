@@ -44,7 +44,6 @@ For example, you need to access the database from HTTP (controller). Both HTTP a
 - [Projects general architecture](#Project-general-architecture)
 - [Cheat Sheet](#cheat-sheet)
 - [Quick start](#quick-start)
-
 - [Local Debugging Cheat Sheet](#local-debugging-cheat-sheet)
 - [Postgresql monitoring](#Postgresql-monitoring)
 - [Kakfa monitoring](#Kafka-monitoring)
@@ -77,6 +76,8 @@ The project named go-cqrs-event-sourcing-tt implements a CQRS (Command Query Res
 
 This architecture ensures a clear separation of concerns, scalability, and maintainability in a distributed, event-driven environment.
 
+
+![alt text](docs/img/diagramFaz1.jpeg.jpeg)
 
 
 ## Project General architecture
@@ -148,29 +149,26 @@ This architecture ensures a clear separation of concerns, scalability, and maint
 ## Quick Start
 
 ```sh
-
-# To bring everything up together, use the compose-up command.  Postgres, App
+# Start all services and dependencies (e.g., PostgreSQL, Kafka, application)
 $ make compose-up
 
-# open kafdrop
+# Open Kafdrop (Kafka monitoring UI) in your browser
 $ http://localhost:9000/
 
-# check database's migrations
+# Access and verify the wallet management database
 $ make login-wallet-db
 
-# check database's migrations
+# Access and verify the query database
 $ make login-query-db
 
-# create wallets
+# Create sample wallets
 $ make create-wallets
 
-# deposit wallets
+# Perform deposit operations on wallets
 $ make deposit-wallets
 
-# withdraw-wallet
+# Perform a withdrawal operation on a wallet
 $ make withdraw-wallet
-
-
 
 ```
 
@@ -193,9 +191,6 @@ $ date -r 1738492914
 $ netstat -tuln
 
 ```
-
-
-
 
 
 
@@ -230,55 +225,6 @@ You can debug the application locally using Visual Studio Code. Here’s an exam
 }
 ```
 
-Before debugging, ensure you have a .env file:
-
-```sh
-# we should copy env file, it works in unix based operating systems
-$ cp .env.example .env 
-
-# prepare the environment
-$ make prepare
-
-# create swagger files
-$ make swag-v1
-
-#  Bring up other components without starting the app
-$ make compose-up-without-app
-
-# check the containers
-$ docker ps
-
-# migrate the tables
-$ make migrate-up 
-# if you see these messages, you should download migrate tool.
-# migrate -path migrations -database 'postgres://user:pass@localhost:5432/postgres?sslmode=disable' up
-# make: migrate: No such file or directory
-$ go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
-
-# retry migrate the tables
-$ make migrate-up 
-
-# Access the PostgreSQL database running in a Docker container as the specified user and database.
-$ docker exec -it postgres psql -U user -d postgres
-
-# View table structure:
-$ \d messages
-
-# if you see this message "Did not find any relations." you should onload migrate tool.
-$ go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
-
-#you can check the status of the new tool
-$ which migrate
-
-# # Run the application locally in debug mode.
-
-# To insert mock messages.
-$ make mock-messages:
-
-# check application health
-$ check-health:
-
-```
 
 
 
@@ -307,8 +253,9 @@ $ \q
 ## Kafka monitoring
 
 To monitor Kafka activity, you can use Kafdrop.
+```sh
 If you run docker compose-up, Kafdrop will be available at http://localhost:9000/.
-
+```
 
 
 ## Start over from the beginning
@@ -360,16 +307,15 @@ $ docker logs -tail=all <containerid>
 
 
 
-## missing parts
+## Missing features
 
-- Balans kontrolünü asset-query-service üzerinden http call ile yapılabilir, asset-processor eventjournal'a gönderirken bir noktada tutulabilir, asset-porcessor içinden query dbsine erişmek de mümkün ama servisleri mümkün mertebe loselty couple yapmaya çalışşmak önemli.
-- transfer işlemlerinde belirli bir balance'ı rezerve etmek mantıklı olacaktır.
-- hangi network hangi asset ile olabilir bilgisi ve vlaidasyonu eklenmeli.
-- Authentication Middleware eklenmeli
-- retry ve dead letter queue geliştirmelerit tamamlanmalı.
-- source of truth'u event journal yapmak sitedim ama schedule transaction gelince , önce commad queue'da karşılamak mantıklı oldu, o sebeple asset processor ciddi validasyon eklenmeli.
-- commadn queue'ya çıkılan verileri bir yerde tutmadım ayrıca, belki oraya gelen komutları da ayrı bir yerde tutmak  veri bütünlüğünü düzenlemek için işlevel oalbilir. 
-
+	•	Balance checks can be performed via an HTTP call to the Asset-Query-Service. Alternatively, the Asset-Processor can maintain balance control before sending events to the event journal. It is also possible for the Asset-Processor to directly access the query database. However, it is crucial to aim for loosely coupled services whenever possible.
+	•	For transfer operations, it would be logical to reserve a specific balance for pending transactions.
+	•	Information about which network supports which asset, along with validation rules, should be added.
+	•	An Authentication Middleware should be implemented.
+	•	Enhancements related to retry logic and a Dead Letter Queue should be completed.
+	•	I aimed to make the Event Journal the source of truth. However, with the introduction of scheduled transactions, handling them initially in the Command Queue proved more logical. Therefore, the Asset-Processor needs robust validation mechanisms.
+	•	I did not maintain a separate store for data sent to the Command Queue. It might be beneficial to persist these commands separately to help ensure data consistency and integrity.
 
 
 
