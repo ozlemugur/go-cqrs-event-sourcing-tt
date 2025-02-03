@@ -1,0 +1,25 @@
+app:
+  name: 'message-sender'
+  version: '1.0.0'
+
+http:
+  port: '8080'
+
+
+logger:
+  log_level: 'trace'
+  rollbar_env: 'message-sender'
+
+
+postgres:
+  pool_max: 5
+  url: 'postgres://user:pass@127.0.0.1:5432/postgres'
+
+mocky:
+  url: 'https://run.mocky.io/v3/867bd0cd-d166-4885-bc1f-32894a3ff73a'
+
+kafka:
+  KAFKA_BROKER: 'localhost:9094'
+  EVENT_TOPIC: 'event-journal'
+  COMMAND_QUEUE_TOPIC: 'command-queue'
+

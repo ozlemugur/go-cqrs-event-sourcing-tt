@@ -1,23 +1,32 @@
 basePath: /v1
 definitions:
-  entity.Asset:
-    properties:
-      amount:
-        type: number
-      name:
-        type: string
-    type: object
-  entity.Wallet:
+  entity.WalletRequest:
     properties:
       address:
+        description: Wallet address (required)
         type: string
-      assets:
-        items:
-          $ref: '#/definitions/entity.Asset'
-        type: array
+      network:
+        description: Network type (required)
+        type: string
+    required:
+    - address
+    - network
+    type: object
+  entity.WalletResponse:
+    properties:
+      address:
+        description: Wallet address
+        type: string
+      created_at:
+        type: string
       id:
+        description: Wallet ID
         type: integer
       network:
+        description: Network type
+        type: string
+      status:
+        description: Status field (optional)
         type: string
     type: object
   v1.response:
@@ -45,7 +54,7 @@ paths:
         name: wallet
         required: true
         schema:
-          $ref: '#/definitions/entity.Wallet'
+          $ref: '#/definitions/entity.WalletRequest'
       produces:
       - application/json
       responses:
@@ -111,7 +120,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/entity.Wallet'
+            $ref: '#/definitions/entity.WalletResponse'
         "404":
           description: Not Found
           schema:

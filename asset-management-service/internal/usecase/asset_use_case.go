@@ -12,22 +12,22 @@ import (
 
 // AssetUseCase handles asset transactions using event sourcing.
 type AssetUseCase struct {
-	eventJournal EventJournal // Event producer (Kafka)
+	commandQueue CommandProducerHandler // Event producer (Kafka)
 	log          logger.Interface
 }
 
 // NewAssetUseCase creates a new asset use case.
-func NewAssetUseCase(eventJournal EventJournal, l logger.Interface) *AssetUseCase {
+func NewAssetUseCase(commandQueue CommandProducerHandler, l logger.Interface) *AssetUseCase {
 	return &AssetUseCase{
-		eventJournal: eventJournal,
+		commandQueue: commandQueue,
 		log:          l,
 	}
 }
 
 // Withdraw funds from a wallet (Publishes event)
 func (uc *AssetUseCase) Withdraw(ctx context.Context, walletID int, assetName string, amount float64) error {
-	event := entity.WalletEvent{
-		EventID:   uuid.New().String(),
+	command := entity.Command{
+		CommandID: uuid.New().String(),
 		WalletID:  walletID,
 		Type:      "withdraw",
 		AssetName: assetName,
@@ -35,7 +35,7 @@ func (uc *AssetUseCase) Withdraw(ctx context.Context, walletID int, assetName st
 		Timestamp: time.Now().Unix(),
 	}
 
-	if err := uc.eventJournal.PublishEvent(ctx, event); err != nil {
+	if err := uc.commandQueue.PublishCommand(ctx, command); err != nil {
 		return fmt.Errorf("Withdraw - PublishEvent: %w", err)
 	}
 
@@ -46,8 +46,8 @@ func (uc *AssetUseCase) Withdraw(ctx context.Context, walletID int, assetName st
 // Deposit funds into a wallet (Publishes event)
 func (uc *AssetUseCase) Deposit(ctx context.Context, walletID int, assetName string, amount float64) error {
 	//wallet check , ya header üzerinden teyitli geldiğini var sayabiliriz ya da httpcall ve ya readonly bir check yapabiliriz
-	event := entity.WalletEvent{
-		EventID:   uuid.New().String(),
+	command := entity.Command{
+		CommandID: uuid.New().String(),
 		WalletID:  walletID,
 		Type:      "deposit",
 		AssetName: assetName,
@@ -55,7 +55,7 @@ func (uc *AssetUseCase) Deposit(ctx context.Context, walletID int, assetName str
 		Timestamp: time.Now().Unix(),
 	}
 
-	if err := uc.eventJournal.PublishEvent(ctx, event); err != nil {
+	if err := uc.commandQueue.PublishCommand(ctx, command); err != nil {
 		return fmt.Errorf("Deposit - PublishEvent: %w", err)
 	}
 
@@ -63,56 +63,37 @@ func (uc *AssetUseCase) Deposit(ctx context.Context, walletID int, assetName str
 	return nil
 }
 
-// Transfer funds between wallets (Publishes two events: Withdraw + Deposit)
-func (uc *AssetUseCase) Transfer(ctx context.Context, fromWalletID, toWalletID int, assetName string, amount float64) error {
-	// TODO: balance check gerekiyor
-	withdrawEvent := entity.WalletEvent{
-		EventID:   uuid.New().String(),
-		WalletID:  fromWalletID,
-		Type:      "withdraw",
-		AssetName: assetName,
-		Amount:    amount,
-		Timestamp: time.Now().Unix(),
+// Transfer funds between wallets (Publishes a TransferCommand)
+func (uc *AssetUseCase) Transfer(ctx context.Context, fromWalletID, toWalletID int, assetName string, amount float64, executeTime int64) error {
+	if executeTime == 0 || executeTime <= time.Now().Unix() {
+		executeTime = time.Now().Unix()
+	}
+	status := "scheduled"
+	if executeTime <= time.Now().Unix() {
+		status = "executed" // Eğer executeTime geçmişte bir zamansa, işlemi hemen gerçekleştir
+	}
+	transferCommand := entity.TransferCommand{
+		CommandID:   uuid.New().String(), // Benzersiz komut ID'si
+		FromWallet:  fromWalletID,
+		ToWallet:    toWalletID,
+		AssetName:   assetName,
+		Amount:      amount,
+		Type:        "transfer",
+		ExecuteTime: executeTime, // Komutun yürütüleceği zaman zamanı
+		Status:      status,      // Başlangıç durumu
+		CreatedAt:   time.Now(),  // Oluşturulma zamanı
 	}
 
-	depositEvent := entity.WalletEvent{
-		EventID:   uuid.New().String(),
-		WalletID:  toWalletID,
-		Type:      "deposit",
-		AssetName: assetName,
-		Amount:    amount,
-		Timestamp: time.Now().Unix(),
+	// Komut Kafka'ya gönderiliyor
+	if err := uc.commandQueue.PublishCommand(ctx, transferCommand); err != nil {
+		return fmt.Errorf("Transfer - PublishCommand: %w", err)
 	}
 
-	// Publish both events
-	if err := uc.eventJournal.PublishEvent(ctx, withdrawEvent); err != nil {
-		return fmt.Errorf("Transfer - Withdraw PublishEvent: %w", err)
-	}
-	if err := uc.eventJournal.PublishEvent(ctx, depositEvent); err != nil {
-		return fmt.Errorf("Transfer - Deposit PublishEvent: %w", err)
-	}
-
-	uc.log.Info("Transfer events published", "FromWalletID", fromWalletID, "ToWalletID", toWalletID, "AssetName", assetName, "Amount", amount)
+	uc.log.Info("Transfer command published",
+		"FromWalletID", fromWalletID,
+		"ToWalletID", toWalletID,
+		"AssetName", assetName,
+		"Amount", amount,
+	)
 	return nil
 }
-
-/*
-// Schedule a future transaction (Publishes event) this feature will implement differently
-func (uc *AssetUseCase) ScheduleTransaction(ctx context.Context, transaction entity.ScheduledTransactionRequest) error {
-	//transaction.ID = uuid.New().String()
-
-	/*event := entity.ScheduledTransactionEvent{
-		EventID:     transaction.ID,
-		WalletID:    transaction.FromWallet,
-		Type:        "scheduled_transaction",
-		AssetName:   transaction.AssetName,
-		Amount:      transaction.Amount,
-		ExecuteTime: transaction.ExecuteTime.Unix(),
-	} */
-
-/*if err := uc.eventJournal.PublishEvent(ctx, event); err != nil {
-	return fmt.Errorf("ScheduleTransaction - PublishEvent: %w", err)
-} */
-
-//uc.log.Info("Scheduled transaction event published", "TransactionID", transaction.ID, "AssetName", transaction.AssetName, "ExecuteTime", transaction.ExecuteTime)
-//} */

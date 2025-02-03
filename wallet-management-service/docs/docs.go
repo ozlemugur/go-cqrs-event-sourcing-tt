@@ -36,7 +36,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/entity.Wallet"
+                            "$ref": "#/definitions/entity.WalletRequest"
                         }
                     }
                 ],
@@ -89,7 +89,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/entity.Wallet"
+                            "$ref": "#/definitions/entity.WalletResponse"
                         }
                     },
                     "404": {
@@ -152,33 +152,43 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "entity.Asset": {
+        "entity.WalletRequest": {
             "type": "object",
+            "required": [
+                "address",
+                "network"
+            ],
             "properties": {
-                "amount": {
-                    "type": "number"
+                "address": {
+                    "description": "Wallet address (required)",
+                    "type": "string"
                 },
-                "name": {
+                "network": {
+                    "description": "Network type (required)",
                     "type": "string"
                 }
             }
         },
-        "entity.Wallet": {
+        "entity.WalletResponse": {
             "type": "object",
             "properties": {
                 "address": {
+                    "description": "Wallet address",
                     "type": "string"
                 },
-                "assets": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entity.Asset"
-                    }
+                "created_at": {
+                    "type": "string"
                 },
                 "id": {
+                    "description": "Wallet ID",
                     "type": "integer"
                 },
                 "network": {
+                    "description": "Network type",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "Status field (optional)",
                     "type": "string"
                 }
             }

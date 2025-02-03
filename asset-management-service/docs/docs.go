@@ -62,53 +62,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/assets/schedule": {
-            "post": {
-                "description": "Schedule a future transaction",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "assets"
-                ],
-                "summary": "Schedule a transaction",
-                "operationId": "schedule-transaction",
-                "parameters": [
-                    {
-                        "description": "Scheduled transaction request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/entity.ScheduledTransactionRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/v1.assetResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/v1.assetResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/v1.assetResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/assets/transfer": {
             "post": {
                 "description": "Transfer funds between wallets",
@@ -205,38 +158,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "entity.ScheduledTransactionRequest": {
-            "type": "object",
-            "required": [
-                "amount",
-                "asset_name",
-                "execute_time",
-                "from_wallet_id",
-                "to_wallet_id"
-            ],
-            "properties": {
-                "amount": {
-                    "description": "Amount to transfer",
-                    "type": "number"
-                },
-                "asset_name": {
-                    "description": "Asset to transfer",
-                    "type": "string"
-                },
-                "execute_time": {
-                    "description": "Execution time (Unix timestamp)",
-                    "type": "integer"
-                },
-                "from_wallet_id": {
-                    "description": "Sender wallet",
-                    "type": "integer"
-                },
-                "to_wallet_id": {
-                    "description": "Receiver wallet",
-                    "type": "integer"
-                }
-            }
-        },
         "entity.TransactionRequest": {
             "type": "object",
             "required": [
@@ -264,6 +185,7 @@ const docTemplate = `{
             "required": [
                 "amount",
                 "asset_name",
+                "execute_time",
                 "from_wallet_id",
                 "to_wallet_id"
             ],
@@ -275,6 +197,10 @@ const docTemplate = `{
                 "asset_name": {
                     "description": "Asset being transferred",
                     "type": "string"
+                },
+                "execute_time": {
+                    "description": "time (Unix) When this should be executed",
+                    "type": "integer"
                 },
                 "from_wallet_id": {
                     "description": "Sender wallet",
@@ -307,7 +233,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/v1",
 	Schemes:          []string{},
 	Title:            "Asset Management Service",
-	Description:      "Asset Management Service",
+	Description:      "Asset Management Service (Command API - Writes to Kafka)",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

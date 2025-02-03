@@ -2,15 +2,17 @@ package entity
 
 import "time"
 
-type Wallet struct {
-	ID        int       `json:"id"`
-	Address   string    `json:"address"`
-	Network   string    `json:"network"`
-	Assets    []Asset   `json:"assets,omitempty"`
-	CreatedAt time.Time `json:"-" db:"created_at"`
+// WalletRequest represents the request payload when creating or updating a wallet
+type WalletRequest struct {
+	Address string `json:"address" binding:"required"` // Wallet address (required)
+	Network string `json:"network" binding:"required"` // Network type (required)
 }
 
-type Asset struct {
-	Name   string  `json:"name"`
-	Amount float64 `json:"amount"`
+// WalletResponse represents the response payload when retrieving a wallet
+type WalletResponse struct {
+	ID        int       `json:"id" db:"id"`           // Wallet ID
+	Address   string    `json:"address" db:"address"` // Wallet address
+	Network   string    `json:"network" db:"network"` // Network type
+	Status    string    `json:"status" db:"status"`   // Status field (optional)
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
 }

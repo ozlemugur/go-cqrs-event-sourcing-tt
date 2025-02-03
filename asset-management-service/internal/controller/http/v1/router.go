@@ -20,7 +20,7 @@ import (
 // NewRouter -.
 // Swagger spec:
 // @title       Asset Management Service
-// @description Asset Management Service
+// @description Asset Management Service (Command API - Writes to Kafka)
 // @version     1.0
 // @host        localhost:8082
 // @BasePath    /v1

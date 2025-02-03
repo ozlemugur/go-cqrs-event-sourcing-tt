@@ -29,7 +29,7 @@ compose-up: ##  Run docker-compose
 .PHONY: compose-up
 
 compose-up-app: ##  ddd
-	docker-compose up --build -d asset-management-service && docker-compose logs -f
+	docker-compose up --build -d asset-processor && docker-compose logs -f
 .PHONY: compose-up-app
 
 compose-up-without-app: ##  Run docker-compose without app

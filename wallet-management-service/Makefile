@@ -18,14 +18,9 @@ swag-wallet: ## swag wallet-management-service init
 	( swag init -g internal/controller/http/v1/router.go -o docs )
 .PHONY: swag-wallet
 
-run: swag-v1 ## swag run and migrate
-	go mod tidy && go mod download && \
-	DISABLE_SWAGGER_HTTP_HANDLER='' GIN_MODE=debug CGO_ENABLED=0 go run -tags migrate ./cmd/app
-.PHONY: run
-
 prepare: ##  prepare the environment
 	go clean -cache -modcache -i -r
-	go clean -modcache && go mod tidy && go mod download
+	go clean -modcache && go mod tidy && go mod download && go mod vendor
 .PHONY: prepare
 
 compose-up: ##  Run docker-compose 
@@ -41,7 +36,6 @@ compose-down: ##  Down docker-compose
 .PHONY: compose-down
 
 
-
 migrate-create: ##  create new migration from sql
 	migrate create -ext sql -dir migrations 'wallet_management_service'
 .PHONY: migrate-create
@@ -52,14 +46,6 @@ migrate-up: ##  migration up
 
 
 
-
-
-docker-rm-volume: ##  remove docker volume
-	docker volume rm go-cqrs-event-sourcing-tt_pg-data
-.PHONY: docker-rm-volume
-
-
-
 integration-test: ##  run integration-test
 	go clean -testcache && go test -v ./integration-test/...
 .PHONY: integration-test
@@ -67,26 +53,6 @@ integration-test: ##  run integration-test
 check-health:## check health
 	curl -f http://localhost:8080/healthz || echo "Health check failed"
 .PHONY:check-health
-
-
-mock-messages:
-	curl -X 'POST' 'http://localhost:8080/v1/messages' -H 'accept: application/json' -H 'Content-Type: application/json'  -d '{"content": " Legends never die Song by League of legends, Against The Current https://open.spotify.com/track/0TI3HDmlvuD0rCwHe5m2wD?si=c8ff85eca986442c", "recipient_phone": "05057136986"}'
-	curl -X 'POST' 'http://localhost:8080/v1/messages' -H 'accept: application/json' -H 'Content-Type: application/json'  -d '{ "content": " Canta Per me by Yoki kajiura  https://open.spotify.com/track/0TI3HDmlvuD0rCwHe5m2wD?si=c8ff85eca986442c","recipient_phone": "05057136988" }'
-	curl -X 'POST' 'http://localhost:8080/v1/messages' -H 'accept: application/json' -H 'Content-Type: application/json'  -d '{ "content": " king Song by Florence and the machine https://open.spotify.com/track/1VSngtLdJhrlfHkLxTyOXK?si=d9292df2504e4da0", "recipient_phone": "05057136986" }'
-	curl -X 'POST' 'http://localhost:8080/v1/messages' -H 'accept: application/json' -H 'Content-Type: application/json'  -d '{ "content": " mother nature Song by The Hu and LP https://open.spotify.com/track/35SoEGEXsaNnfi8PsT8xEC?si=4347af98187349fa", "recipient_phone": "05057136986"}'
-	curl -X 'POST' 'http://localhost:8080/v1/messages' -H 'accept: application/json' -H 'Content-Type: application/json'  -d '{"content": " winding river by yu-peng chen https://open.spotify.com/track/04WnFdVesT0VLu1Fc57VoI?si=c12404e1bbb34564","recipient_phone": "05057136986"}'
-	curl -X 'POST' 'http://localhost:8080/v1/messages' -H 'accept: application/json' -H 'Content-Type: application/json'  -d '{"content": " Legends never die Song by League of legends, Against The Current https://open.spotify.com/track/0TI3HDmlvuD0rCwHe5m2wD?si=c8ff85eca986442c", "recipient_phone": "05057136986"}'
-	curl -X 'POST' 'http://localhost:8080/v1/messages' -H 'accept: application/json' -H 'Content-Type: application/json'  -d '{ "content": " Canta Per me by Yoki kajiura  https://open.spotify.com/track/0TI3HDmlvuD0rCwHe5m2wD?si=c8ff85eca986442c","recipient_phone": "05057136988" }'
-	curl -X 'POST' 'http://localhost:8080/v1/messages' -H 'accept: application/json' -H 'Content-Type: application/json'  -d '{ "content": " king Song by Florence and the machine https://open.spotify.com/track/1VSngtLdJhrlfHkLxTyOXK?si=d9292df2504e4da0", "recipient_phone": "05057136986" }'
-	curl -X 'POST' 'http://localhost:8080/v1/messages' -H 'accept: application/json' -H 'Content-Type: application/json'  -d '{ "content": " mother nature Song by The Hu and LP https://open.spotify.com/track/35SoEGEXsaNnfi8PsT8xEC?si=4347af98187349fa", "recipient_phone": "05057136986"}'
-	curl -X 'POST' 'http://localhost:8080/v1/messages' -H 'accept: application/json' -H 'Content-Type: application/json'  -d '{"content": " winding river by yu-peng chen https://open.spotify.com/track/04WnFdVesT0VLu1Fc57VoI?si=c12404e1bbb34564","recipient_phone": "05057136986"}'
-	curl -X 'POST' 'http://localhost:8080/v1/messages' -H 'accept: application/json' -H 'Content-Type: application/json'  -d '{"content": " Legends never die Song by League of legends, Against The Current https://open.spotify.com/track/0TI3HDmlvuD0rCwHe5m2wD?si=c8ff85eca986442c", "recipient_phone": "05057136986"}'
-	curl -X 'POST' 'http://localhost:8080/v1/messages' -H 'accept: application/json' -H 'Content-Type: application/json'  -d '{ "content": " Canta Per me by Yoki kajiura  https://open.spotify.com/track/0TI3HDmlvuD0rCwHe5m2wD?si=c8ff85eca986442c","recipient_phone": "05057136988" }'
-	curl -X 'POST' 'http://localhost:8080/v1/messages' -H 'accept: application/json' -H 'Content-Type: application/json'  -d '{ "content": " king Song by Florence and the machine https://open.spotify.com/track/1VSngtLdJhrlfHkLxTyOXK?si=d9292df2504e4da0", "recipient_phone": "05057136986" }'
-	curl -X 'POST' 'http://localhost:8080/v1/messages' -H 'accept: application/json' -H 'Content-Type: application/json'  -d '{ "content": " mother nature Song by The Hu and LP https://open.spotify.com/track/35SoEGEXsaNnfi8PsT8xEC?si=4347af98187349fa", "recipient_phone": "05057136986"}'
-	curl -X 'POST' 'http://localhost:8080/v1/messages' -H 'accept: application/json' -H 'Content-Type: application/json'  -d '{"content": " winding river by yu-peng chen https://open.spotify.com/track/04WnFdVesT0VLu1Fc57VoI?si=c12404e1bbb34564","recipient_phone": "05057136986"}'
-
-.PHONY mock-messages:
 
 
 bin-deps:

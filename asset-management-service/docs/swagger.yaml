@@ -1,29 +1,5 @@
 basePath: /v1
 definitions:
-  entity.ScheduledTransactionRequest:
-    properties:
-      amount:
-        description: Amount to transfer
-        type: number
-      asset_name:
-        description: Asset to transfer
-        type: string
-      execute_time:
-        description: Execution time (Unix timestamp)
-        type: integer
-      from_wallet_id:
-        description: Sender wallet
-        type: integer
-      to_wallet_id:
-        description: Receiver wallet
-        type: integer
-    required:
-    - amount
-    - asset_name
-    - execute_time
-    - from_wallet_id
-    - to_wallet_id
-    type: object
   entity.TransactionRequest:
     properties:
       amount:
@@ -48,6 +24,9 @@ definitions:
       asset_name:
         description: Asset being transferred
         type: string
+      execute_time:
+        description: time (Unix) When this should be executed
+        type: integer
       from_wallet_id:
         description: Sender wallet
         type: integer
@@ -57,6 +36,7 @@ definitions:
     required:
     - amount
     - asset_name
+    - execute_time
     - from_wallet_id
     - to_wallet_id
     type: object
@@ -70,7 +50,7 @@ definitions:
 host: localhost:8082
 info:
   contact: {}
-  description: Asset Management Service
+  description: Asset Management Service (Command API - Writes to Kafka)
   title: Asset Management Service
   version: "1.0"
 paths:
@@ -103,37 +83,6 @@ paths:
           schema:
             $ref: '#/definitions/v1.assetResponse'
       summary: Deposit funds
-      tags:
-      - assets
-  /assets/schedule:
-    post:
-      consumes:
-      - application/json
-      description: Schedule a future transaction
-      operationId: schedule-transaction
-      parameters:
-      - description: Scheduled transaction request
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/entity.ScheduledTransactionRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/v1.assetResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/v1.assetResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/v1.assetResponse'
-      summary: Schedule a transaction
       tags:
       - assets
   /assets/transfer:

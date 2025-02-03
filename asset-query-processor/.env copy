@@ -1,0 +1,7 @@
+DISABLE_SWAGGER_HTTP_HANDLER=true
+GIN_MODE=debug
+PG_URL: postgres://query_user:query_password@query-db:5432/query_db
+KAFKA_BROKER: localhost:9094
+EVENT_TOPIC: event-journal
+RETRY_TOPIC : 'query-processor-retry'
+DLQ_TOPIC : 'query-procesor-dlq'

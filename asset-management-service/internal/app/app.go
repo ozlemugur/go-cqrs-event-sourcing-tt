@@ -8,9 +8,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/asset-management-service/config"
+	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/asset-management-service/internal/controller/command"
 	v1 "github.com/ozlemugur/go-cqrs-event-sourcing-tt/asset-management-service/internal/controller/http/v1"
 	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/asset-management-service/internal/usecase"
-	eventjournal "github.com/ozlemugur/go-cqrs-event-sourcing-tt/asset-management-service/internal/usecase/event-journal"
 	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/pkg/httpserver"
 	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/pkg/kafka/producer"
 	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/pkg/logger"
@@ -33,10 +33,10 @@ func Run(cfg *config.Config) {
 	}
 	defer kafkaProducer.Close() // Ensure producer is closed on shutdown
 
-	eventJournal := eventjournal.NewKafkaEventJournal(kafkaProducer, eventTopic)
+	commandQueue := command.NewCommandProducer(kafkaProducer, eventTopic)
 
 	assetUseCase := usecase.NewAssetUseCase(
-		eventJournal,
+		commandQueue,
 		l,
 	)
 
@@ -66,47 +66,4 @@ func Run(cfg *config.Config) {
 		l.Error(fmt.Errorf("app - Run - httpServer.Shutdown: %w", err))
 	}
 
-	/*
-	   messageSenderWebAPI := webapi.NewMessageSenderWebAPI(cfg.Mocky.URL)
-	   // Use case
-	   messageUseCase := usecase.NewMessageUseCase(
-
-	   	repo.NewMessage(pg),
-	   	messageSenderWebAPI,
-	   	l,
-
-	   )
-
-	   l.Debug("messageUseCase created")
-	   autoMessageScheduler := scheduler.NewAutoMessageScheduler(messageUseCase, l)
-	   autoMessageScheduler.Start()
-
-	   autoMessageUseCase := usecase.NewAutoMessageSchedulerUseCase(messageUseCase, autoMessageScheduler, l)
-
-	   // HTTP Server
-	   handler := gin.New()
-	   v1.NewRouter(handler, l, autoMessageUseCase, messageUseCase)
-	   httpServer := httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
-
-	   // Waiting signal
-	   interrupt := make(chan os.Signal, 1)
-	   signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
-
-	   select {
-	   case s := <-interrupt:
-
-	   	l.Info("app - Run - signal: " + s.String())
-
-	   case err = <-httpServer.Notify():
-
-	   		l.Error(fmt.Errorf("app - Run - httpServer.Notify: %w", err))
-	   	}
-
-	   // Shutdown
-	   err = httpServer.Shutdown()
-
-	   	if err != nil {
-	   		l.Error(fmt.Errorf("app - Run - httpServer.Shutdown: %w", err))
-	   	}
-	*/
 }

@@ -20,10 +20,9 @@ func newAssetRoutes(handler *gin.RouterGroup, t usecase.AssetHandler, l logger.I
 
 	h := handler.Group("/assets")
 	{
-		h.POST("/withdraw", r.Withdraw)            // Withdraw funds
-		h.POST("/deposit", r.Deposit)              // Deposit funds
-		h.POST("/transfer", r.Transfer)            // Transfer between wallets
-		h.POST("/schedule", r.ScheduleTransaction) // Schedule a future transaction
+		h.POST("/withdraw", r.Withdraw) // Withdraw funds
+		h.POST("/deposit", r.Deposit)   // Deposit funds
+		h.POST("/transfer", r.Transfer) // Transfer between wallets
 	}
 }
 
@@ -111,40 +110,11 @@ func (r *assetRoutes) Transfer(c *gin.Context) {
 	}
 
 	// Include asset_name in the use case call
-	if err := r.t.Transfer(c.Request.Context(), req.FromWalletID, req.ToWalletID, req.AssetName, req.Amount); err != nil {
+	if err := r.t.Transfer(c.Request.Context(), req.FromWalletID, req.ToWalletID, req.AssetName, req.Amount, req.ExecuteTime); err != nil {
 		r.l.Error(err, "http - v1 - Transfer - use case error")
 		errorResponse(c, http.StatusInternalServerError, "Transfer failed")
 		return
 	}
-
-	c.JSON(http.StatusOK, assetResponse{Status: "success"})
-}
-
-// @Summary     Schedule a transaction
-// @Description Schedule a future transaction
-// @ID          schedule-transaction
-// @Tags        assets
-// @Accept      json
-// @Produce     json
-// @Param       request body entity.ScheduledTransactionRequest true "Scheduled transaction request"
-// @Success     200 {object} assetResponse
-// @Failure     400 {object} assetResponse
-// @Failure     500 {object} assetResponse
-// @Router      /assets/schedule [post]
-func (r *assetRoutes) ScheduleTransaction(c *gin.Context) {
-	var req entity.ScheduledTransactionRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		r.l.Error(err, "http - v1 - ScheduleTransaction - invalid input")
-		errorResponse(c, http.StatusBadRequest, "Invalid input")
-		return
-	}
-
-	// Include asset_name in the use case call
-	//	if err := r.t.ScheduleTransaction(c.Request.Context(), req); err != nil {
-	//		r.l.Error(err, "http - v1 - ScheduleTransaction - use case error")
-	//		errorResponse(c, http.StatusInternalServerError, "Scheduling failed")
-	//		return
-	//	}
 
 	c.JSON(http.StatusOK, assetResponse{Status: "success"})
 }

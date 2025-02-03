@@ -8,34 +8,26 @@ import (
 	"github.com/ozlemugur/go-cqrs-event-sourcing-tt/wallet-management-service/internal/entity"
 )
 
-// WalletUseCase - İş mantığı için WalletHandler implementasyonu
+// WalletUseCase implements the business logic for wallet operations.
 type WalletUseCase struct {
 	repo WalletRepositoryHandler
-	l    logger.Interface
+	log  logger.Interface
 }
 
-// NewWalletUseCase - Yeni bir WalletUseCase instance'ı oluşturur.
-func NewWalletUseCase(r WalletRepositoryHandler, l logger.Interface) *WalletUseCase {
+// NewWalletUseCase creates a new instance of WalletUseCase.
+func NewWalletUseCase(r WalletRepositoryHandler, log logger.Interface) *WalletUseCase {
 	return &WalletUseCase{
 		repo: r,
-		l:    l,
+		log:  log,
 	}
 }
 
-// GetAllWallets - Veritabanından tüm cüzdanları getirir
-func (uc *WalletUseCase) GetAllWallets(ctx context.Context) ([]entity.Wallet, error) {
-	wallets, err := uc.repo.GetAllWallets(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("WalletUseCase - GetAllWallets - uc.repo.GetAllWallets: %w", err)
-	}
-	return wallets, nil
-}
-
-// GetWalletByID - Belirtilen ID'ye sahip cüzdanı getirir
-func (uc *WalletUseCase) GetWalletByID(ctx context.Context, id int) (*entity.Wallet, error) {
+// GetWalletByID retrieves a wallet by its ID.
+func (uc *WalletUseCase) GetWalletByID(ctx context.Context, id int) (*entity.WalletResponse, error) {
 	wallet, err := uc.repo.GetWalletByID(ctx, id)
 	if err != nil {
-		return nil, fmt.Errorf("WalletUseCase - GetWalletByID - uc.repo.GetWalletByID: %w", err)
+		uc.log.Error(err, "WalletUseCase - GetWalletByID - repository error")
+		return nil, fmt.Errorf("WalletUseCase - GetWalletByID: %w", err)
 	}
 	if wallet == nil {
 		return nil, fmt.Errorf("WalletUseCase - GetWalletByID: wallet not found")
@@ -43,39 +35,45 @@ func (uc *WalletUseCase) GetWalletByID(ctx context.Context, id int) (*entity.Wal
 	return wallet, nil
 }
 
-// CreateWallet - Yeni bir cüzdan oluşturur
-func (uc *WalletUseCase) CreateWallet(ctx context.Context, wallet entity.Wallet) error {
-	// Address ve Network boş olmamalı
+// CreateWallet adds a new wallet to the database.
+func (uc *WalletUseCase) CreateWallet(ctx context.Context, wallet entity.WalletRequest) error {
+	// Validate required fields
 	if wallet.Address == "" || wallet.Network == "" {
 		return fmt.Errorf("WalletUseCase - CreateWallet: address or network is empty")
 	}
 
-	err := uc.repo.CreateWallet(ctx, wallet)
-	if err != nil {
-		return fmt.Errorf("WalletUseCase - CreateWallet - uc.repo.CreateWallet: %w", err)
+	if err := uc.repo.CreateWallet(ctx, wallet); err != nil {
+		uc.log.Error(err, "WalletUseCase - CreateWallet - repository error")
+		return fmt.Errorf("WalletUseCase - CreateWallet: %w", err)
 	}
+
+	uc.log.Info("Wallet created successfully", "address", wallet.Address)
 	return nil
 }
 
-// UpdateWallet - Belirtilen ID'ye sahip bir cüzdanı günceller
-func (uc *WalletUseCase) UpdateWallet(ctx context.Context, id int, wallet entity.Wallet) error {
-	// Address ve Network boş olmamalı
+// UpdateWallet updates an existing wallet by its ID.
+func (uc *WalletUseCase) UpdateWallet(ctx context.Context, id int, wallet entity.WalletRequest) error {
+	// Validate required fields
 	if wallet.Address == "" || wallet.Network == "" {
 		return fmt.Errorf("WalletUseCase - UpdateWallet: address or network is empty")
 	}
 
-	err := uc.repo.UpdateWallet(ctx, id, wallet)
-	if err != nil {
-		return fmt.Errorf("WalletUseCase - UpdateWallet - uc.repo.UpdateWallet: %w", err)
+	if err := uc.repo.UpdateWallet(ctx, id, wallet); err != nil {
+		uc.log.Error(err, "WalletUseCase - UpdateWallet - repository error")
+		return fmt.Errorf("WalletUseCase - UpdateWallet: %w", err)
 	}
+
+	uc.log.Info("Wallet updated successfully", "wallet_id", id)
 	return nil
 }
 
-// DeleteWallet - Belirtilen ID'ye sahip bir cüzdanı siler
+// DeleteWallet performs a soft delete of a wallet by its ID.
 func (uc *WalletUseCase) DeleteWallet(ctx context.Context, id int) error {
-	err := uc.repo.DeleteWallet(ctx, id)
-	if err != nil {
-		return fmt.Errorf("WalletUseCase - DeleteWallet - uc.repo.DeleteWallet: %w", err)
+	if err := uc.repo.DeleteWallet(ctx, id); err != nil {
+		uc.log.Error(err, "WalletUseCase - DeleteWallet - repository error")
+		return fmt.Errorf("WalletUseCase - DeleteWallet: %w", err)
 	}
+
+	uc.log.Info("Wallet deleted successfully", "wallet_id", id)
 	return nil
 }

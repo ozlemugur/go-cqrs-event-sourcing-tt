@@ -92,11 +92,10 @@ func Run(cfg *config.Config) {
 	eventConsumer.Start(ctx)
 
 	// Handle system signals for shutdown
-	/*	go handleShutdown(cancel, consumer, l)
-
-		// Start consuming events
-		l.Info("Starting Event Consumer...")
-		consumer.Start(ctx) */
+	go handleShutdown(cancel, eventConsumer, l)
+	// Start consuming events
+	l.Info("Starting Event Consumer...")
+	eventConsumer.Start(ctx)
 
 }
 

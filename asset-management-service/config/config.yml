@@ -20,5 +20,5 @@ mocky:
 
 kafka:
   KAFKA_BROKER: '127.0.0.1:9092'
-  EVENT_TOPIC: 'event-journal'
+  EVENT_TOPIC: 'command-queue'
 

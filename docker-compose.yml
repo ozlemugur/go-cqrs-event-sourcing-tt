@@ -141,6 +141,33 @@ services:
       - query-db
       - kafka
 
+
+  ## # Asset Processor (Command Handler - Writes to Kafka)
+  asset-processor:
+    image:  asset-processor:latest
+    build:
+      context: ./asset-processor
+      dockerfile: Dockerfile
+    restart: always
+    container_name: asset-processor 
+    environment:
+      KAFKA_BROKER: kafka:9092
+      EVENT_TOPIC: event-journal
+      RETRY_TOPIC : 'query-processor-retry'
+      DLQ_TOPIC : 'query-procesor-dlq'
+      COMMAND_QUEUE_TOPIC: 'command-queue'
+      QUERY_DB_HOST: query-db
+      QUERY_DB_PORT: 5432
+      QUERY_DB_USER: query_user
+      QUERY_DB_PASSWORD: query_password
+      QUERY_DB_NAME: query_db
+      PG_URL: 'postgres://query_user:query_password@query-db:5432/query_db'
+      LOG_LEVEL: trace
+    depends_on:
+      - query-db
+      - kafka
+
+
     
     
     # Asset Management Service (Command API - Writes to Kafka)
@@ -153,7 +180,7 @@ services:
     container_name:  asset-management-service 
     environment:
       KAFKA_BROKER: kafka:9092
-      EVENT_TOPIC: event-journal  # Writes all transactions to this topic
+      EVENT_TOPIC: command-queue  # Writes all transactions to this topic
       LOG_LEVEL: trace
       HTTP_PORT: 8080
     depends_on:
@@ -168,6 +195,7 @@ services:
     - "9000:9000"
     environment:
      KAFKA_BROKER_CONNECT: kafka:9092
+     ENABLE_MESSAGE_DECODE: true
     depends_on:
       - kafka
 
