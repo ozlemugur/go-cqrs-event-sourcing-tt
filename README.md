@@ -77,7 +77,7 @@ The project named go-cqrs-event-sourcing-tt implements a CQRS (Command Query Res
 This architecture ensures a clear separation of concerns, scalability, and maintainability in a distributed, event-driven environment.
 
 
-![alt text](docs/img/diagramFaz1.jpeg.jpeg)
+![alt text](docs/img/diagramFaz1.jpeg)
 
 
 ## Project General architecture
