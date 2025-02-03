@@ -41,7 +41,7 @@ func NewKafkaProducer(broker string, opts ...ProducerOption) (*KafkaProducer, er
 }
 
 // ProduceEvent sends a structured event to Kafka
-func (p *KafkaProducer) ProduceEvent(topic string, event interface{}, key string, headers []kafka.Header) error {
+func (p *KafkaProducer) ProduceEvent(topic string, event interface{}, key string) error {
 	eventBytes, err := json.Marshal(event)
 	if err != nil {
 		return fmt.Errorf("failed to serialize event: %w", err)
@@ -51,7 +51,6 @@ func (p *KafkaProducer) ProduceEvent(topic string, event interface{}, key string
 		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
 		Key:            []byte(key), // Partition by key (e.g., wallet ID)
 		Value:          eventBytes,
-		Headers:        headers, // Header bilgilerini ekle
 	}
 
 	// Deliver event asynchronously
