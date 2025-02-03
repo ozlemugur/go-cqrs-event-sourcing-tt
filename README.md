@@ -55,22 +55,23 @@ For example, you need to access the database from HTTP (controller). Both HTTP a
 ## Holistic Overview
 
 The project named go-cqrs-event-sourcing-tt implements a CQRS (Command Query Responsibility Segregation) architecture with the following components:
-	1.	Wallet-Management-Service:
+
+### Wallet-Management-Service:
 	•	A RESTful API microservice.
 	•	Responsible for creating, deleting, and updating wallet information.
 	•	Uses a PostgreSQL database to store wallet records.
-	2.	Asset-Management-Service:
+### Asset-Management-Service:
 	•	Another RESTful API microservice.
 	•	Handles operations like deposit, withdraw, and transfer.
 	•	Publishes commands to a Kafka command queue.
-	3.	Asset-Processor:
+### Asset-Processor:
 	•	Listens to commands from the Kafka command queue.
 	•	Validates and processes the commands, then writes events to a Kafka event journal.
 	•	Manages scheduled transfers by either rescheduling them or generating the appropriate events when the time comes.
-	4.	Asset-Query-Processor:
+### Asset-Query-Processor:
 	•	Consumes events from the Kafka event journal.
 	•	Updates a query database, which is implemented in PostgreSQL but can also use MongoDB.
-	5.	Asset-Query-Service:
+### Asset-Query-Service:
 	•	A RESTful API microservice.
 	•	Serves data retrieved from the query database to external clients.
 
